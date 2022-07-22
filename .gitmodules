@@ -1,0 +1,6 @@
+[submodule "code/db/dependencies/googletest"]
+	path = code/db/dependencies/googletest
+	url = https://github.com/google/googletest.git
+[submodule "code/db/dependencies/libpqxx"]
+	path = code/db/dependencies/libpqxx
+	url = https://github.com/jtv/libpqxx.git
