@@ -13,7 +13,7 @@
 #define CUR_PARTICIPANTS_KEY "cur_participants"
 
 polytour::db::utility::FieldSet
-polytour::db::repository::TournamentRepository::toFieldSet(const polytour::db::repository::Tournament &obj) {
+polytour::db::repository::TournamentRepository::toFieldSet(const polytour::transport::Tournament &obj) {
     utility::FieldSet result;
     result.addPair(ID_KEY, utility::TableAbstractValue(obj.id));
     result.addPair(NAME_KEY, utility::TableAbstractValue(obj.name));
@@ -28,9 +28,9 @@ polytour::db::repository::TournamentRepository::toFieldSet(const polytour::db::r
     return result;
 }
 
-polytour::db::repository::Tournament
+polytour::transport::Tournament
 polytour::db::repository::TournamentRepository::fromFieldSet(const polytour::db::utility::FieldSet &field) {
-    Tournament result;
+    transport::Tournament result;
 
     if (field.has_value_under_key(ID_KEY))
         result.id = field[ID_KEY].toInt();
@@ -55,7 +55,7 @@ polytour::db::repository::TournamentRepository::fromFieldSet(const polytour::db:
 }
 
 polytour::db::utility::FieldSet
-polytour::db::repository::TournamentRepository::toFieldSet(const polytour::db::repository::Tournament::search_t &obj) {
+polytour::db::repository::TournamentRepository::toFieldSet(const polytour::transport::Tournament::search_t &obj) {
     utility::FieldSet result;
     if (obj.id_.has_value())
         result.addPair(ID_KEY, utility::TableAbstractValue(obj.id_.value()));

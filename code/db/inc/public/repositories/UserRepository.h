@@ -6,24 +6,23 @@
 #define COURSEWORKDB_USERREPOSITORY_H
 
 #include "Repository.h"
-
+#include "User.h"
 #include <utility>
-#include "ORM/User.h"
 
 namespace polytour::db::repository {
-    class UserRepository: public Repository<User> {
+    class UserRepository: public Repository<transport::User> {
     public:
 
         explicit UserRepository(std::shared_ptr<IConnection> conn):
-                Repository<User>(std::move(conn)) {}
+                Repository<transport::User>(std::move(conn)) {}
 
     private:
 
-        utility::FieldSet toFieldSet(const User &obj) override;
+        utility::FieldSet toFieldSet(const transport::User &obj) override;
 
-        User fromFieldSet(const utility::FieldSet &field) override;
+        transport::User fromFieldSet(const utility::FieldSet &field) override;
 
-        utility::FieldSet toFieldSet(const User::search_t &obj) override;
+        utility::FieldSet toFieldSet(const transport::User::search_t &obj) override;
 
         Identity getIdentity() override;
     };

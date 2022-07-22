@@ -1,17 +1,16 @@
 //
-// Created by denis on 7/12/22.
+// Created by denis on 7/22/22.
 //
 
 #ifndef COURSEWORKDB_USER_H
 #define COURSEWORKDB_USER_H
 
 #include "IIdentifiable.h"
-#include "ISearchORM.h"
+#include "NotMandatoryField.h"
 #include <string>
 #include <optional>
-#include "utility/NotMandatoryField.h"
 
-namespace polytour::db::repository {
+namespace polytour::transport {
     class User: public IIdentifiable{
     public:
         int id;
@@ -22,12 +21,9 @@ namespace polytour::db::repository {
         utility::NotMandatoryField<int> age;
         std::string password;
 
-        int getOID() override {
-            return id;
-        }
+        int getOID() override {return id;}
 
-        class SearchUser: public ISearchORM{
-        public:
+        struct SearchUser{
             std::optional<decltype(id)> id_;
             std::optional<decltype(name)> name_;
             std::optional<decltype(surname)> surname_;

@@ -13,7 +13,7 @@
 #define PASSWORD_KEY "password"
 
 polytour::db::utility::FieldSet
-polytour::db::repository::UserRepository::toFieldSet(const polytour::db::repository::User &obj) {
+polytour::db::repository::UserRepository::toFieldSet(const polytour::transport::User &obj) {
     utility::FieldSet result;
     result.addPair(ID_KEY, utility::TableAbstractValue(obj.id));
     result.addPair(NAME_KEY, utility::TableAbstractValue(obj.name));
@@ -31,9 +31,9 @@ polytour::db::repository::UserRepository::toFieldSet(const polytour::db::reposit
     return result;
 }
 
-polytour::db::repository::User
+polytour::transport::User
 polytour::db::repository::UserRepository::fromFieldSet(const polytour::db::utility::FieldSet &field) {
-    User result;
+    transport::User result;
 
     if (field.has_value_under_key(ID_KEY))
         result.id = field[ID_KEY].toInt();
@@ -98,7 +98,7 @@ polytour::db::repository::Identity polytour::db::repository::UserRepository::get
 }
 
 polytour::db::utility::FieldSet
-polytour::db::repository::UserRepository::toFieldSet(const polytour::db::repository::User::search_t &obj) {
+polytour::db::repository::UserRepository::toFieldSet(const polytour::transport::User::search_t &obj) {
     utility::FieldSet result;
     if (obj.id_.has_value())
         result.addPair(ID_KEY, utility::TableAbstractValue(obj.id_.value()));

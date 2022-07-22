@@ -22,23 +22,22 @@ add_library(${PROJECT_NAME} STATIC
         inc/public/repositories/IRepository.h
         inc/public/repositories/IRepositoryInitializer.h
         inc/public/repositories/Repository.h
-        inc/public/repositories/ORM/IIdentifiable.h
-        inc/public/repositories/ORM/User.h
         src/repositories/UserRepository.cpp
         inc/public/repositories/UserRepository.h
-        inc/public/repositories/ORM/Tournament.h
-        inc/public/repositories/ORM/ISearchORM.h
         src/repositories/TournamentRepository.cpp
         inc/public/repositories/TournamentRepository.h
-        inc/public/repositories/ORM/Match.h
         inc/public/utility/NotMandatoryField.h
         src/repositories/RepositoryFactory.cpp
         inc/public/repositories/RepositoryFactory.h
-        inc/public/repositories/IRepositoryFactory.h src/repositories/MatchRepository.cpp inc/public/repositories/MatchRepository.h)
+        inc/public/repositories/IRepositoryFactory.h
+        src/repositories/MatchRepository.cpp
+        inc/public/repositories/MatchRepository.h)
+
+target_link_libraries(${PROJECT_NAME} transport)
 
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
 target_include_directories(${PROJECT_NAME} PUBLIC inc/public)
-
+target_include_directories(${PROJECT_NAME} PUBLIC ../transport)
 
 target_link_libraries(${PROJECT_NAME}  pqxx)
 

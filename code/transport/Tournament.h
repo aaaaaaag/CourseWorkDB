@@ -1,17 +1,17 @@
 //
-// Created by denis on 13.07.2022.
+// Created by denis on 7/22/22.
 //
 
 #ifndef COURSEWORKDB_TOURNAMENT_H
 #define COURSEWORKDB_TOURNAMENT_H
 
+
 #include "IIdentifiable.h"
-#include "ISearchORM.h"
-#include "utility/NotMandatoryField.h"
+#include "NotMandatoryField.h"
 #include <string>
 #include <optional>
 
-namespace polytour::db::repository {
+namespace polytour::transport {
     class Tournament: public IIdentifiable{
     public:
         int id;
@@ -21,13 +21,9 @@ namespace polytour::db::repository {
         int organizer_id;
         int max_participants_num;
         int cur_participants_num;
+        int getOID() override { return id; }
 
-        int getOID() override {
-            return id;
-        }
-
-        class SearchTournament: public ISearchORM{
-        public:
+        struct SearchTournament{
             std::optional<decltype(id)> id_;
             std::optional<decltype(name)> name_;
             std::optional<decltype(description)> description_;

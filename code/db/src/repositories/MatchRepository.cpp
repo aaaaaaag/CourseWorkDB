@@ -18,7 +18,7 @@
 #define PREV_MATCH_2_ID "prev_match_2_id"
 
 polytour::db::utility::FieldSet
-polytour::db::repository::MatchRepository::toFieldSet(const polytour::db::repository::Match &obj) {
+polytour::db::repository::MatchRepository::toFieldSet(const polytour::transport::Match &obj) {
     utility::FieldSet result;
     result.addPair(ID_KEY, utility::TableAbstractValue(obj.id));
     result.addPair(TOURNAMENT_ID_KEY, utility::TableAbstractValue(obj.tournament_id));
@@ -64,7 +64,7 @@ polytour::db::repository::MatchRepository::toFieldSet(const polytour::db::reposi
 
 
 polytour::db::utility::FieldSet
-polytour::db::repository::MatchRepository::toFieldSet(const polytour::db::repository::Match::search_t &obj) {
+polytour::db::repository::MatchRepository::toFieldSet(const polytour::transport::Match::search_t &obj) {
     utility::FieldSet result;
     if (obj.id_.has_value())
         result.addPair(ID_KEY, utility::TableAbstractValue(obj.id_.value()));
@@ -120,9 +120,9 @@ polytour::db::repository::MatchRepository::toFieldSet(const polytour::db::reposi
     return result;
 }
 
-polytour::db::repository::Match
+polytour::transport::Match
 polytour::db::repository::MatchRepository::fromFieldSet(const polytour::db::utility::FieldSet &field) {
-    Match result;
+    transport::Match result;
 
     if (field.has_value_under_key(ID_KEY))
         result.id = field[ID_KEY].toInt();

@@ -6,24 +6,23 @@
 #define COURSEWORKDB_TOURNAMENTREPOSITORY_H
 
 #include "Repository.h"
-
 #include <utility>
-#include "ORM/Tournament.h"
+#include "Tournament.h"
 
 namespace polytour::db::repository {
-    class TournamentRepository: public Repository<Tournament> {
+    class TournamentRepository: public Repository<transport::Tournament> {
     public:
 
         explicit TournamentRepository(std::shared_ptr<IConnection> conn):
-                Repository<Tournament>(std::move(conn)) {}
+                Repository<transport::Tournament>(std::move(conn)) {}
 
     private:
 
-        utility::FieldSet toFieldSet(const Tournament &obj) override;
+        utility::FieldSet toFieldSet(const transport::Tournament &obj) override;
 
-        Tournament fromFieldSet(const utility::FieldSet &field) override;
+        transport::Tournament fromFieldSet(const utility::FieldSet &field) override;
 
-        utility::FieldSet toFieldSet(const Tournament::search_t &obj) override;
+        utility::FieldSet toFieldSet(const transport::Tournament::search_t &obj) override;
 
         Identity getIdentity() override;
     };
