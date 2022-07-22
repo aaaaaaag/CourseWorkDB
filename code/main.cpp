@@ -1,9 +1,4 @@
 #include <iostream>
-#include "public/PostgreSqlAdapter.h"
-#include "utility/PostgreSqlCommandSource.h"
-
-#include "repositories/UserRepository.h"
-#include "SqlConnection.h"
 #include "repositories/RepositoryFactory.h"
 
 
@@ -11,12 +6,12 @@ using namespace polytour::db;
 
 int main() {
 
-    polytour::db::utility::FieldSet fieldSet;
-    fieldSet.addPair("user", utility::FieldSet::value_t("myuser"));
-    fieldSet.addPair("password", utility::FieldSet::value_t("mypass"));
-    fieldSet.addPair("dbname", utility::FieldSet::value_t("mydb"));
+//    polytour::db::utility::FieldSet fieldSet;
+//    fieldSet.addPair("user", utility::FieldSet::value_t("myuser"));
+//    fieldSet.addPair("password", utility::FieldSet::value_t("mypass"));
+//    fieldSet.addPair("dbname", utility::FieldSet::value_t("mydb"));
 
-    repository::RepositoryFactory factory(fieldSet);
+//    repository::RepositoryFactory factory(fieldSet);
 
     //repository::Transaction transaction(fieldSet);
 //    auto userRepo = factory.getUserRepository().lock();

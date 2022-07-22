@@ -2,7 +2,7 @@
 // Created by denis on 16.07.2022.
 //
 
-#include "public/repositories/RepositoryFactory.h"
+#include "repositories/RepositoryFactory.h"
 #include "SqlConnection.h"
 #include "PostgreSqlAdapter.h"
 #include "utility/PostgreSqlCommandSource.h"
