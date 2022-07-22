@@ -1,17 +1,16 @@
 //
-// Created by denis on 14.07.2022.
+// Created by denis on 7/22/22.
 //
 
 #ifndef COURSEWORKDB_MATCH_H
 #define COURSEWORKDB_MATCH_H
 
 #include "IIdentifiable.h"
-#include "ISearchORM.h"
 #include <string>
 #include <optional>
-#include "utility/NotMandatoryField.h"
+#include "NotMandatoryField.h"
 
-namespace polytour::db::repository {
+namespace polytour::transport {
     class Match: public IIdentifiable{
     public:
         int id;
@@ -31,8 +30,7 @@ namespace polytour::db::repository {
             return id;
         }
 
-        class SearchMatch: public ISearchORM{
-        public:
+        struct SearchMatch{
             std::optional<decltype(id)> id_;
             std::optional<decltype(tournament_id)> tournament_id_;
             std::optional<decltype(participant_1_id)> participant_1_id_;
