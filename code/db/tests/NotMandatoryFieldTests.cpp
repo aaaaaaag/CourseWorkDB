@@ -2,7 +2,7 @@
 // Created by denis on 7/19/22.
 //
 
-#include "utility/NotMandatoryField.h"
+#include "NotMandatoryField.h"
 #include "gtest/gtest.h"
 
 namespace polytour::db::tests::utility {

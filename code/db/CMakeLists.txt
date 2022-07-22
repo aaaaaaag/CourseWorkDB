@@ -26,20 +26,17 @@ add_library(${PROJECT_NAME} STATIC
         inc/public/repositories/UserRepository.h
         src/repositories/TournamentRepository.cpp
         inc/public/repositories/TournamentRepository.h
-        inc/public/utility/NotMandatoryField.h
+        src/repositories/MatchRepository.cpp
+        inc/public/repositories/MatchRepository.h
         src/repositories/RepositoryFactory.cpp
         inc/public/repositories/RepositoryFactory.h
-        inc/public/repositories/IRepositoryFactory.h
-        src/repositories/MatchRepository.cpp
-        inc/public/repositories/MatchRepository.h)
+        inc/public/repositories/IRepositoryFactory.h)
 
 target_link_libraries(${PROJECT_NAME} transport)
-
+target_link_libraries(${PROJECT_NAME} pqxx)
 target_include_directories(${PROJECT_NAME} PUBLIC inc)
 target_include_directories(${PROJECT_NAME} PUBLIC inc/public)
 target_include_directories(${PROJECT_NAME} PUBLIC ../transport)
-
-target_link_libraries(${PROJECT_NAME}  pqxx)
 
 add_executable(${PROJECT_NAME}-tests
         tests/mocks/MockDatabaseAdapter.h
@@ -51,7 +48,8 @@ add_executable(${PROJECT_NAME}-tests
         tests/NotMandatoryFieldTests.cpp
         tests/FieldSetTests.cpp)
 
-target_link_libraries(${PROJECT_NAME}-tests ${PROJECT_NAME} gtest gmock gtest_main)
+target_link_libraries(${PROJECT_NAME}-tests ${PROJECT_NAME} gtest gmock gtest_main transport)
+target_include_directories(${PROJECT_NAME}-tests PUBLIC ../transport)
 
 add_subdirectory(dependencies/libpqxx)
 add_subdirectory(dependencies/googletest)
