@@ -30,7 +30,7 @@ public:
                 "user=" + connInfo["user"].toString() + " "
                 "host=localhost "
                 "password=" + connInfo["password"].toString() + " "
-                "dbname=" + connInfo["dbname"].toString()
+                "dbname=mydb"
         )),
         _transaction(_conn)
         {}
