@@ -8,6 +8,7 @@
 #include "UserRepository.h"
 #include "TournamentRepository.h"
 #include "MatchRepository.h"
+#include "TournamentParticipantsRepository.h"
 
 namespace polytour::db::repository {
     class IRepositoryFactory {
@@ -20,6 +21,8 @@ namespace polytour::db::repository {
         virtual TournamentRepository* getTournamentRepository() = 0;
 
         virtual MatchRepository* getMatchRepository() = 0;
+
+        virtual TournamentParticipantsRepository* getTournamentParticipantsRepository() = 0;
 
     };
 }

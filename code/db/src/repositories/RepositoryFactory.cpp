@@ -19,6 +19,7 @@ polytour::db::repository::RepositoryFactory::RepositoryFactory(const transport::
     _pUserRepo = std::make_unique<decltype(_pUserRepo)::element_type>(_pConn);
     _pTournamentRepo = std::make_unique<decltype(_pTournamentRepo)::element_type>(_pConn);
     _pMatchRepo = std::make_unique<decltype(_pMatchRepo)::element_type>(_pConn);
+    _pTournamentParticipantsRepo = std::make_unique<decltype(_pTournamentParticipantsRepo)::element_type>(_pConn);
 }
 
 UserRepository* polytour::db::repository::RepositoryFactory::getUserRepository() {
@@ -31,6 +32,10 @@ TournamentRepository* polytour::db::repository::RepositoryFactory::getTournament
 
 MatchRepository *RepositoryFactory::getMatchRepository() {
     return _pMatchRepo.get();
+}
+
+TournamentParticipantsRepository *RepositoryFactory::getTournamentParticipantsRepository() {
+    return _pTournamentParticipantsRepo.get();
 }
 
 RepositoryFactory::~RepositoryFactory() {
