@@ -11,6 +11,8 @@ namespace polytour::db::repository {
     class RepositoryFactory: public IRepositoryFactory{
     public:
 
+        RepositoryFactory() = delete;
+
         explicit RepositoryFactory(const transport::User& activeUser);
 
         ~RepositoryFactory() override;
@@ -21,12 +23,15 @@ namespace polytour::db::repository {
 
         MatchRepository* getMatchRepository() override;
 
+        TournamentParticipantsRepository *getTournamentParticipantsRepository() override;
+
     private:
 
         std::shared_ptr<IConnection> _pConn;
         std::unique_ptr<UserRepository> _pUserRepo;
         std::unique_ptr<TournamentRepository> _pTournamentRepo;
         std::unique_ptr<MatchRepository> _pMatchRepo;
+        std::unique_ptr<TournamentParticipantsRepository> _pTournamentParticipantsRepo;
     };
 }
 
