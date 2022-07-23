@@ -9,10 +9,13 @@
 
 using namespace polytour::db::repository;
 
-polytour::db::repository::RepositoryFactory::RepositoryFactory(const utility::FieldSet& connInfo):
-_pConn(std::make_shared<SqlConnection>(
-        std::make_shared<PostgreSqlAdapter>(connInfo),
-        std::make_shared<utility::PostgreSqlCommandSource>())){
+polytour::db::repository::RepositoryFactory::RepositoryFactory(const transport::User& activeUser) {
+    utility::FieldSet connInfo;
+    connInfo.addPair("user", utility::TableAbstractValue(activeUser.nickname));
+    connInfo.addPair("password", utility::TableAbstractValue(activeUser.password));
+    _pConn = std::make_shared<SqlConnection>(std::make_shared<PostgreSqlAdapter>(connInfo),
+                                             std::make_shared<utility::PostgreSqlCommandSource>());
+
     _pUserRepo = std::make_unique<decltype(_pUserRepo)::element_type>(_pConn);
     _pTournamentRepo = std::make_unique<decltype(_pTournamentRepo)::element_type>(_pConn);
     _pMatchRepo = std::make_unique<decltype(_pMatchRepo)::element_type>(_pConn);

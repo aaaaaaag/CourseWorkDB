@@ -11,7 +11,7 @@ namespace polytour::db::repository {
     class RepositoryFactory: public IRepositoryFactory{
     public:
 
-        explicit RepositoryFactory(const utility::FieldSet& connInfo);
+        explicit RepositoryFactory(const transport::User& activeUser);
 
         ~RepositoryFactory() override;
 
