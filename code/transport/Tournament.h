@@ -23,6 +23,10 @@ namespace polytour::transport {
         int cur_participants_num;
         int getOID() override { return id; }
 
+        const std::string status_wait_for_participants = "wait";
+        const std::string status_started = "started";
+        const std::string status_finished = "finished";
+
         struct SearchTournament{
             std::optional<decltype(id)> id_;
             std::optional<decltype(name)> name_;
