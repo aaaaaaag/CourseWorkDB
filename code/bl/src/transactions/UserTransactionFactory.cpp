@@ -2,7 +2,7 @@
 // Created by denis on 7/23/22.
 //
 
-#include "UserTransactionFactory.h"
+#include "transactions/UserTransactionFactory.h"
 
 #include <utility>
 #include "repositories/RepositoryFactory.h"

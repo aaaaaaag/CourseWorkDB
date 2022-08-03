@@ -2,7 +2,7 @@
 // Created by denis on 7/23/22.
 //
 
-#include "TournamentTransactionFactory.h"
+#include "transactions/TournamentTransactionFactory.h"
 #include <utility>
 #include "repositories/RepositoryFactory.h"
 
