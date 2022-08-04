@@ -2,10 +2,11 @@
 // Created by denis on 02.08.2022.
 //
 
-#include "AuthorizationWindow.h"
+#include "windows/AuthorizationWindow.h"
 #include "cdk/cdk.h"
 #include <string>
 #include <functional>
+#include <utility>
 
 static BINDFN_PROTO (activateEntry);
 static BINDFN_PROTO (activateButton);
@@ -14,6 +15,7 @@ static BINDFN_PROTO (cancel);
 
 typedef struct UserData {
     SScreen* cdk_screen;
+    std::shared_ptr<polytour::ui::ICoordinator> coordinator;
     const char* nickname;
     const char* password;
 } UserData;
@@ -21,7 +23,7 @@ typedef struct UserData {
 class polytour::ui::cdk::AuthorizationWindow::Impl {
 public:
 
-    Impl() {
+    explicit Impl(std::shared_ptr<ICoordinator> coordinator): _pCoordinator(std::move(coordinator)) {
         cdkScreen = initCDKScreen(nullptr);
         initCDKColor ();
 
@@ -69,6 +71,7 @@ public:
         // Initialization of utility struct
         UserData userData {
                 .cdk_screen = cdkScreen,
+                .coordinator = _pCoordinator,
                 .nickname = nick_entry->info,
                 .password = pass_entry->info
         };
@@ -108,7 +111,7 @@ public:
     };
 
     bool isDestroyed = false;
-
+    std::shared_ptr<ICoordinator> _pCoordinator;
     SEntry* nick_entry;
     SEntry* pass_entry;
     SButton* authorizationButton;
@@ -117,8 +120,8 @@ public:
     SScreen* cdkScreen;
 };
 
-polytour::ui::cdk::AuthorizationWindow::AuthorizationWindow():
-_pImpl(std::make_unique<Impl>()){
+polytour::ui::cdk::AuthorizationWindow::AuthorizationWindow(const std::shared_ptr<ICoordinator>& coordinator):
+_pImpl(std::make_unique<Impl>(coordinator)){
 }
 
 polytour::ui::cdk::AuthorizationWindow::~AuthorizationWindow() = default;
@@ -163,6 +166,12 @@ static int cancel (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void
 static int authorize (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void *clientData, chtype key)
 {
     auto* userData = (UserData*)clientData;
+
+    auto coordinator = userData->coordinator;
+    coordinator->authorize(userData->nickname, userData->password);
+
+
+
     const char *mesg[10];
     char nick[256];
     sprintf (nick, "<C>Nickname: (%.*s)", (int)(sizeof (nick) - 10), userData->nickname);
