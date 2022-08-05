@@ -16,7 +16,7 @@ namespace polytour::ui {
 
         virtual void authorize(const std::string& nick, const std::string& pass) = 0;
 
-        virtual bl::IMainFacade& getMainAPI() = 0;
+        virtual polytour::bl::facade::IMainFacade& getMainAPI() = 0;
 
     };
 }

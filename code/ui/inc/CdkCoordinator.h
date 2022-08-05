@@ -10,8 +10,15 @@
 namespace polytour::ui {
     class CdkCoordinator: public ICoordinator{
     public:
+        CdkCoordinator();
+
         void authorize(const std::string &nick, const std::string &pass) override;
 
+        bl::facade::IMainFacade &getMainAPI() override;
+
+    private:
+
+        std::unique_ptr<bl::facade::IMainFacade> _pMainFacade;
 
     };
 }
