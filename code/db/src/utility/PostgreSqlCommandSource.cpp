@@ -3,7 +3,7 @@
 //
 
 #include "public/utility/PostgreSqlCommandSource.h"
-#include <stdexcept>
+#include "CriticalError.h"
 
 std::string polytour::db::utility::PostgreSqlCommandSource::addObj(const polytour::db::utility::FieldSet &fieldSet,
                                                                    repository::Identity repoIdentity) {
@@ -79,7 +79,7 @@ polytour::db::utility::PostgreSqlCommandSource::initTable(const polytour::db::re
                 curColumn += "serial"; break;
             case TableTypes::Null:
             default:
-                throw std::logic_error("Table column has invalid type");
+                throw polytour::CriticalError("Table column has invalid type");
         }
         switch (column.second.mandatory) {
             case FieldMandatory::NotNull:
@@ -174,12 +174,12 @@ std::string polytour::db::utility::PostgreSqlCommandSource::valueToSQLCommandVie
             else stringExpectedType = "string";
             break;
         default:
-            throw std::logic_error("Illegal expected value type for table column");
+            throw polytour::CriticalError("Illegal expected value type for table column");
     }
     if (mandatory == FieldMandatory::MayBeNull) {
         if (value.isNull()) return "null";
     }
-    throw std::invalid_argument("Invalid value type for " + column_name +
+    throw polytour::CriticalError("Invalid value type for " + column_name +
                                     "column. Expected type " + stringExpectedType);
 }
 
@@ -202,7 +202,7 @@ void polytour::db::utility::PostgreSqlCommandSource::checkFieldSetVsIdentity(
     for (const auto& value: fieldSet) {
         auto tableColumnIt = tableColumns.find(value.first);
         if (tableColumnIt == tableColumns.end())
-            throw std::invalid_argument("Input fieldSet contains unexpected column name: " + value.first);
+            throw polytour::CriticalError("Input fieldSet contains unexpected column name: " + value.first);
     }
 }
 

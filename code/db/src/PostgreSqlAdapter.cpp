@@ -6,6 +6,7 @@
 #include "IDatabaseExecResult.h"
 #include "private/pqxx/converters/ResultConverter.h"
 #include "pqxx/pqxx"
+#include "CriticalError.h"
 
 class PostgreSqlExecResult: public polytour::db::IDatabaseExecResult {
 public:
@@ -40,7 +41,7 @@ public:
             return std::make_shared<PostgreSqlExecResult>(_transaction.exec(command));
         }
         catch (std::exception& ex) {
-            throw std::runtime_error("DB command execution error: " + std::string(ex.what()));
+            throw polytour::CriticalError("DB command execution error: " + std::string(ex.what()));
         }
     }
 

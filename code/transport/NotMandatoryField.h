@@ -8,6 +8,7 @@
 
 #include <optional>
 #include <stdexcept>
+#include "CriticalError.h"
 
 namespace polytour::transport::utility {
     template <class T>
@@ -23,12 +24,12 @@ namespace polytour::transport::utility {
         [[nodiscard]] bool isNull() const {return !_value.has_value();}
         [[nodiscard]] T getValue() const {
             if (!hasValue())
-                throw std::logic_error("Attempt to get value from null");
+                throw polytour::CriticalError("Attempt to get value from null");
             return _value.value();
         }
         [[nodiscard]] std::nullopt_t toNull() const {
             if (!isNull())
-                throw std::logic_error("Attempt to get null from initialised field");
+                throw polytour::CriticalError("Attempt to get null from initialised field");
             return std::nullopt;
         }
 
