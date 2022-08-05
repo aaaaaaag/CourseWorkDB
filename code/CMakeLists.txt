@@ -9,4 +9,4 @@ add_subdirectory(db)
 add_subdirectory(transport)
 add_subdirectory(bl)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC db)
+target_link_libraries(${PROJECT_NAME} PUBLIC db bl transport)

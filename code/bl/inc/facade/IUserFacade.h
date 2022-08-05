@@ -9,7 +9,7 @@
 #include <string>
 #include "User.h"
 
-namespace polytour::bl {
+namespace polytour::bl::facade {
     class IUserFacade {
     public:
 

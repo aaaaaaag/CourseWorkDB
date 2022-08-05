@@ -10,18 +10,19 @@
 #include <vector>
 
 namespace polytour::bl::transaction {
-    class ITournamentTransactionFactory {
+    class IMatchTransactionFactory {
     public:
 
-        virtual ~ITournamentTransactionFactory() = default;
+        virtual ~IMatchTransactionFactory() = default;
 
-        virtual void create(const transport::Tournament& tournament) = 0;
+        virtual void create(const transport::Match& match) = 0;
 
-        virtual void erase(const transport::Tournament& tournament) = 0;
+        virtual void erase(const transport::Match& match) = 0;
 
-        virtual void join(const transport::Tournament& tournament) = 0;
+        virtual std::vector<transport::Match> getMatches(const transport::Match::search_t& search) = 0;
 
-        virtual void leave(const transport::Tournament& tournament) = 0;
+        virtual void updateMatch(const transport::Match& curMatch, const transport::Match& newMatch) = 0;
+
     };
 }
 

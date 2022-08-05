@@ -22,6 +22,8 @@ namespace polytour::bl::transaction {
         virtual void join(const transport::Tournament& tournament) = 0;
 
         virtual void leave(const transport::Tournament& tournament) = 0;
+
+        virtual std::vector<transport::Tournament> search(const transport::Tournament::search_t& search) = 0;
     };
 }
 

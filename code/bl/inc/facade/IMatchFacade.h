@@ -8,7 +8,7 @@
 #include "Match.h"
 #include <vector>
 
-namespace polytour::bl {
+namespace polytour::bl::facade {
     class IMatchFacade {
     public:
 
@@ -18,7 +18,7 @@ namespace polytour::bl {
 
         virtual void erase(const transport::Match& match) = 0;
 
-        virtual void getMatches(const transport::Match::search_t& search) = 0;
+        virtual std::vector<transport::Match> getMatches(const transport::Match::search_t& search) = 0;
     };
 }
 

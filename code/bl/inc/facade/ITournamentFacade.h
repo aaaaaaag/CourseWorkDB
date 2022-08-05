@@ -8,7 +8,7 @@
 #include "Tournament.h"
 #include <vector>
 
-namespace polytour::bl {
+namespace polytour::bl::facade {
     class ITournamentFacade {
     public:
 

@@ -21,6 +21,8 @@ namespace polytour::bl::transaction {
 
         void leave(const transport::Tournament &tournament) override;
 
+        std::vector<transport::Tournament> search(const transport::Tournament::search_t &search) override;
+
     private:
 
         transport::User _curUser;

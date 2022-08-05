@@ -11,13 +11,6 @@
 
 namespace polytour::bl {
     class AuthUserSingleton {
-    public:
-
-        static void authorize(const std::string& nick,
-                              const std::string& pass);
-
-        static transport::User* getInstance();
-
     private:
 
         AuthUserSingleton() = default;
@@ -25,7 +18,23 @@ namespace polytour::bl {
         AuthUserSingleton(const AuthUserSingleton&) = default;
         AuthUserSingleton& operator = (AuthUserSingleton &) = default;
 
-        static std::unique_ptr<transport::User> _pInstance;
+        //static std::unique_ptr<transport::User> _pInstance;
+
+    public:
+
+        static void authorize(const std::string& nick,
+                              const std::string& pass) {
+            //_pInstance = std::make_unique<transport::User>();
+            //_pInstance->nickname = nick;
+            //_pInstance->password = pass;
+        };
+
+        static transport::User* getInstance() {
+            static std::unique_ptr<transport::User> _pInstance = std::make_unique<transport::User>();
+
+            return _pInstance.get();
+            //return _pInstance.get();
+        };
     };
 }
 

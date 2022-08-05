@@ -31,7 +31,7 @@ void polytour::bl::transaction::TournamentTransactionFactory::erase(const polyto
 
 void polytour::bl::transaction::TournamentTransactionFactory::join(const polytour::transport::Tournament &tournament) {
     if ((tournament.cur_participants_num == tournament.max_participants_num) and
-    (tournament.status != tournament.status_wait_for_participants))
+    (tournament.status != tournament.status_wait_for_participants()))
         return;
 
     db::repository::RepositoryFactory repoFactory(_curUser);
@@ -102,6 +102,12 @@ void polytour::bl::transaction::TournamentTransactionFactory::leave(const polyto
         }
         matchRepo->updateObj(match, updatedMatch);
     }
+}
+
+std::vector<polytour::transport::Tournament> polytour::bl::transaction::TournamentTransactionFactory::search(
+        const polytour::transport::Tournament::search_t &search) {
+    db::repository::RepositoryFactory repoFactory(_curUser);
+    return repoFactory.getTournamentRepository()->findObj(search);
 }
 
 polytour::bl::transaction::TournamentTransactionFactory::TournamentTransactionFactory(

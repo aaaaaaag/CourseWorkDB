@@ -10,7 +10,7 @@
 #include "ITournamentFacade.h"
 #include <memory>
 
-namespace polytour::bl {
+namespace polytour::bl::facade {
     class IMainFacade {
     public:
 
