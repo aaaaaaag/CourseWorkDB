@@ -9,6 +9,7 @@
 #include "TournamentRepository.h"
 #include "MatchRepository.h"
 #include "TournamentParticipantsRepository.h"
+#include "roles/IRole.h"
 
 namespace polytour::db::repository {
     class IRepositoryFactory {
@@ -23,6 +24,12 @@ namespace polytour::db::repository {
         virtual MatchRepository* getMatchRepository() = 0;
 
         virtual TournamentParticipantsRepository* getTournamentParticipantsRepository() = 0;
+
+    protected:
+
+        static transport::User roleToUser(const std::shared_ptr<roles::IRole>& role) {
+            return role->toUser();
+        }
 
     };
 }

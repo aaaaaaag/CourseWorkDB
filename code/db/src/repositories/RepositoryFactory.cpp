@@ -47,3 +47,6 @@ RepositoryFactory::~RepositoryFactory() {
     _pConn->commit();
 }
 
+RepositoryFactory::RepositoryFactory(const std::shared_ptr<roles::IRole> &role):
+        RepositoryFactory(roleToUser(role)){}
+

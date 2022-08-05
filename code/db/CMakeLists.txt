@@ -30,7 +30,7 @@ add_library(${PROJECT_NAME} STATIC
         inc/public/repositories/MatchRepository.h
         src/repositories/RepositoryFactory.cpp
         inc/public/repositories/RepositoryFactory.h
-        inc/public/repositories/IRepositoryFactory.h src/repositories/TournamentParticipantsRepository.cpp inc/public/repositories/TournamentParticipantsRepository.h)
+        inc/public/repositories/IRepositoryFactory.h src/repositories/TournamentParticipantsRepository.cpp inc/public/repositories/TournamentParticipantsRepository.h inc/public/repositories/roles/IRole.h src/repositories/roles/GuestRole.cpp inc/public/repositories/roles/GuestRole.h src/repositories/roles/TournamentParticipantRole.cpp inc/public/repositories/roles/TournamentParticipantRole.h src/repositories/roles/TournamentLeaderRole.cpp inc/public/repositories/roles/TournamentLeaderRole.h)
 
 target_link_libraries(${PROJECT_NAME} transport)
 target_link_libraries(${PROJECT_NAME} pqxx)
