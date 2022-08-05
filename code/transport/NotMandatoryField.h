@@ -32,6 +32,11 @@ namespace polytour::transport::utility {
             return std::nullopt;
         }
 
+        NotMandatoryField<T>& operator= (const T& value) {
+            _value = value;
+            return *this;
+        }
+
     private:
         std::optional<T> _value;
     };
