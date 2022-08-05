@@ -6,12 +6,14 @@
 #define COURSEWORKDB_TOURNAMENTTRANSACTIONFACTORY_H
 
 #include "ITournamentTransactionFactory.h"
+#include "repositories/roles/IRole.h"
+#include <memory>
 
 namespace polytour::bl::transaction {
     class TournamentTransactionFactory: public ITournamentTransactionFactory {
     public:
 
-        explicit TournamentTransactionFactory(transport::User curUser);
+        explicit TournamentTransactionFactory(std::shared_ptr<db::repository::roles::IRole> role);
 
         void create(const transport::Tournament &tournament) override;
 
@@ -25,6 +27,7 @@ namespace polytour::bl::transaction {
 
     private:
 
+        std::shared_ptr<db::repository::roles::IRole> _pRole;
         transport::User _curUser;
 
     };

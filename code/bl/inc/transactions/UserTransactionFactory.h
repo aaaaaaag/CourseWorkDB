@@ -7,12 +7,14 @@
 
 #include "IUserTransactionFactory.h"
 #include <memory>
+#include "repositories/roles/IRole.h"
+#include <memory>
 
 namespace polytour::bl::transaction {
     class UserTransactionFactory: public IUserTransactionFactory {
     public:
 
-        explicit UserTransactionFactory(transport::User curUser);
+        explicit UserTransactionFactory(std::shared_ptr<db::repository::roles::IRole> role);
 
         void addUser(const transport::User &user) override;
 
@@ -24,6 +26,7 @@ namespace polytour::bl::transaction {
 
     private:
 
+        std::shared_ptr<db::repository::roles::IRole> _pRole;
         transport::User _curUser;
 
     };

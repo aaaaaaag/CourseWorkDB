@@ -6,14 +6,15 @@
 
 #include <utility>
 #include "repositories/RepositoryFactory.h"
+#include "AuthUserSingleton.h"
 
 void polytour::bl::transaction::UserTransactionFactory::addUser(const polytour::transport::User &user) {
-    db::repository::RepositoryFactory repoFactory(_curUser);
+    db::repository::RepositoryFactory repoFactory(_pRole);
     repoFactory.getUserRepository()->addObj(user);
 }
 
 void polytour::bl::transaction::UserTransactionFactory::deleteUser(const polytour::transport::User &user) {
-    db::repository::RepositoryFactory repoFactory(_curUser);
+    db::repository::RepositoryFactory repoFactory(_pRole);
 
     auto* repoUser = repoFactory.getUserRepository();
     auto* repoTournament = repoFactory.getTournamentRepository();
@@ -34,10 +35,10 @@ void polytour::bl::transaction::UserTransactionFactory::deleteUser(const polytou
     for (const auto& tournament: userParticipateTournaments) {
         auto tournamentMatches = repoMatch->findObj({.tournament_id_ = tournament.id});
         for (const auto& match: tournamentMatches) {
-            if (match.status == match.status_wait_participants) {
+            if (match.status == match.status_wait_participants()) {
                 if (match.participant_1_id.hasValue() && match.participant_1_id.getValue() == user.id) {
                    auto updatedMatch = match;
-                   updatedMatch.status = updatedMatch.status_finished;
+                   updatedMatch.status = updatedMatch.status_finished();
                    //updatedMatch.winner_id =
                 }
             }
@@ -49,16 +50,17 @@ void polytour::bl::transaction::UserTransactionFactory::deleteUser(const polytou
 
 void polytour::bl::transaction::UserTransactionFactory::updateUser(const polytour::transport::User &curUser,
                                                                    const polytour::transport::User &newUser) {
-    db::repository::RepositoryFactory repoFactory(_curUser);
+    db::repository::RepositoryFactory repoFactory(_pRole);
     repoFactory.getUserRepository()->updateObj(curUser, newUser);
 }
 
 std::vector<polytour::transport::User>
 polytour::bl::transaction::UserTransactionFactory::searchUsers(const polytour::transport::User::search_t &searchUser) {
-    db::repository::RepositoryFactory repoFactory(_curUser);
+    db::repository::RepositoryFactory repoFactory(_pRole);
     return repoFactory.getUserRepository()->findObj(searchUser);
 }
 
-polytour::bl::transaction::UserTransactionFactory::UserTransactionFactory(polytour::transport::User curUser):
-_curUser(std::move(curUser)){}
+polytour::bl::transaction::UserTransactionFactory::UserTransactionFactory(std::shared_ptr<db::repository::roles::IRole> role):
+_pRole(std::move(role)),
+_curUser(*AuthUserSingleton::getInstance()){}
 

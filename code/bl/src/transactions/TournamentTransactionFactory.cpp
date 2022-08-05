@@ -5,15 +5,16 @@
 #include "transactions/TournamentTransactionFactory.h"
 #include <utility>
 #include "repositories/RepositoryFactory.h"
+#include "AuthUserSingleton.h"
 
 void
 polytour::bl::transaction::TournamentTransactionFactory::create(const polytour::transport::Tournament &tournament) {
-    db::repository::RepositoryFactory repoFactory(_curUser);
+    db::repository::RepositoryFactory repoFactory(_pRole);
     repoFactory.getTournamentRepository()->addObj(tournament);
 }
 
 void polytour::bl::transaction::TournamentTransactionFactory::erase(const polytour::transport::Tournament &tournament) {
-    db::repository::RepositoryFactory repoFactory(_curUser);
+    db::repository::RepositoryFactory repoFactory(_pRole);
     auto* tournamentRepo = repoFactory.getTournamentRepository();
     auto* matchRepo = repoFactory.getMatchRepository();
     auto* tournamentParticipantsRepo = repoFactory.getTournamentParticipantsRepository();
@@ -34,7 +35,7 @@ void polytour::bl::transaction::TournamentTransactionFactory::join(const polytou
     (tournament.status != tournament.status_wait_for_participants()))
         return;
 
-    db::repository::RepositoryFactory repoFactory(_curUser);
+    db::repository::RepositoryFactory repoFactory(_pRole);
     auto* tournamentRepo = repoFactory.getTournamentRepository();
     auto* tournamentParticipantsRepo = repoFactory.getTournamentParticipantsRepository();
 
@@ -49,7 +50,7 @@ void polytour::bl::transaction::TournamentTransactionFactory::join(const polytou
 }
 
 void polytour::bl::transaction::TournamentTransactionFactory::leave(const polytour::transport::Tournament &tournament) {
-    db::repository::RepositoryFactory repoFactory(_curUser);
+    db::repository::RepositoryFactory repoFactory(_pRole);
     auto* tournamentRepo = repoFactory.getTournamentRepository();
     auto* tournamentParticipantsRepo = repoFactory.getTournamentParticipantsRepository();
     auto* matchRepo = repoFactory.getMatchRepository();
@@ -73,13 +74,13 @@ void polytour::bl::transaction::TournamentTransactionFactory::leave(const polyto
 
     for (const auto& match: matchesWhereUserParticipant1) {
         auto updatedMatch = match;
-        if (match.status == match.status_started ||
-            match.status == match.status_wait_tribes) {
-            updatedMatch.status = updatedMatch.status_finished;
+        if (match.status == polytour::transport::Match::status_started() ||
+            match.status == polytour::transport::Match::status_wait_tribes()) {
+            updatedMatch.status = polytour::transport::Match::status_finished();
             updatedMatch.loser_id = updatedMatch.participant_1_id;
             updatedMatch.winner_id = updatedMatch.participant_2_id;
         }
-        else if (match.status == match.status_wait_participants) {
+        else if (match.status == polytour::transport::Match::status_wait_participants()) {
             updatedMatch.loser_id = updatedMatch.participant_1_id;
         }
         matchRepo->updateObj(match, updatedMatch);
@@ -91,13 +92,13 @@ void polytour::bl::transaction::TournamentTransactionFactory::leave(const polyto
 
     for (const auto& match: matchesWhereUserParticipant2) {
         auto updatedMatch = match;
-        if (match.status == match.status_started ||
-            match.status == match.status_wait_tribes) {
-            updatedMatch.status = updatedMatch.status_finished;
+        if (match.status == polytour::transport::Match::status_started() ||
+            match.status == polytour::transport::Match::status_wait_tribes()) {
+            updatedMatch.status = polytour::transport::Match::status_finished();
             updatedMatch.loser_id = updatedMatch.participant_2_id;
             updatedMatch.winner_id = updatedMatch.participant_1_id;
         }
-        else if (match.status == match.status_wait_participants) {
+        else if (match.status == polytour::transport::Match::status_wait_participants()) {
             updatedMatch.loser_id = updatedMatch.participant_2_id;
         }
         matchRepo->updateObj(match, updatedMatch);
@@ -106,9 +107,11 @@ void polytour::bl::transaction::TournamentTransactionFactory::leave(const polyto
 
 std::vector<polytour::transport::Tournament> polytour::bl::transaction::TournamentTransactionFactory::search(
         const polytour::transport::Tournament::search_t &search) {
-    db::repository::RepositoryFactory repoFactory(_curUser);
+    db::repository::RepositoryFactory repoFactory(_pRole);
     return repoFactory.getTournamentRepository()->findObj(search);
 }
 
 polytour::bl::transaction::TournamentTransactionFactory::TournamentTransactionFactory(
-        polytour::transport::User curUser): _curUser(std::move(curUser)) {}
+        std::shared_ptr<db::repository::roles::IRole> role):
+        _pRole(std::move(role)),
+        _curUser(*AuthUserSingleton::getInstance()) {}

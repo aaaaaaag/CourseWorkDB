@@ -5,6 +5,7 @@
 #include "facade/UserFacade.h"
 #include "AuthUserSingleton.h"
 #include "transactions/UserTransactionFactory.h"
+#include "repositories/roles/GuestRole.h"
 
 void polytour::bl::facade::UserFacade::auth(const std::string &nick, const std::string &pass) {
     polytour::bl::AuthUserSingleton::authorize(nick, pass);
@@ -23,6 +24,5 @@ void polytour::bl::facade::UserFacade::regNewUser(const polytour::transport::Use
 }
 
 polytour::bl::facade::UserFacade::UserFacade():
-_pTransactionFactory(std::make_unique<transaction::UserTransactionFactory>(*AuthUserSingleton::getInstance())) {
-
-}
+_pTransactionFactory(std::make_unique<transaction::UserTransactionFactory>(
+        std::make_shared<db::repository::roles::GuestRole>())){}

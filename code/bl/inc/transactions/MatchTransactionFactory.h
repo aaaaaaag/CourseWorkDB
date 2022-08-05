@@ -6,12 +6,14 @@
 #define COURSEWORKDB_MATCHTRANSACTIONFACTORY_H
 
 #include "IMatchTransactionFactory.h"
+#include "repositories/roles/IRole.h"
+#include <memory>
 
 namespace polytour::bl::transaction {
     class MatchTransactionFactory: public IMatchTransactionFactory{
     public:
 
-        MatchTransactionFactory(transport::User curUser);
+        MatchTransactionFactory(std::shared_ptr<db::repository::roles::IRole> role);
 
         void create(const transport::Match &match) override;
 
@@ -23,6 +25,7 @@ namespace polytour::bl::transaction {
 
     private:
 
+        std::shared_ptr<db::repository::roles::IRole> _pRole;
         transport::User _curUser;
 
     };
