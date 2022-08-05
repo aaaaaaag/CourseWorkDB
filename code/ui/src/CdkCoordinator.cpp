@@ -7,10 +7,15 @@
 #include <utility>
 #include "facade/MainFacade.h"
 
-void polytour::ui::CdkCoordinator::authorize(const std::string &nick, const std::string &pass) {
+std::optional<polytour::bl::ErrorObj>
+polytour::ui::CdkCoordinator::authorize(const std::string &nick, const std::string &pass) {
     _pMainFacade->userAPI()->auth(nick, pass);
+    auto error = _pMainFacade->userAPI()->getError();
+    if (error)
+        return error;
     //_pCurrentWindow->destroy();
     _pCurrentWindow = _pWindowsFactory->createMainMenuWindow();
+    return std::nullopt;
 }
 
 polytour::bl::facade::IMainFacade &polytour::ui::CdkCoordinator::getMainAPI() {

@@ -7,6 +7,7 @@
 
 #include <string>
 #include "facade/IMainFacade.h"
+#include "ErrorObj.h"
 
 namespace polytour::ui {
     class ICoordinator {
@@ -14,7 +15,7 @@ namespace polytour::ui {
 
         virtual ~ICoordinator() = default;
 
-        virtual void authorize(const std::string& nick, const std::string& pass) = 0;
+        virtual std::optional<bl::ErrorObj> authorize(const std::string& nick, const std::string& pass) = 0;
 
         virtual polytour::bl::facade::IMainFacade& getMainAPI() = 0;
 

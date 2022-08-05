@@ -172,19 +172,22 @@ static int authorize (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, v
     auto* userData = (UserData*)clientData;
 
     auto coordinator = userData->coordinator;
-    coordinator.lock()->authorize(userData->nickname, userData->password);
-//
-//    const char *mesg[10];
-//    char nick[256];
-//    sprintf (nick, "<C>Nickname: (%.*s)", (int)(sizeof (nick) - 10), userData->nickname);
-//    char pass[256];
-//    sprintf (pass, "<C>Password: (%.*s)", (int)(sizeof (pass) - 10), userData->password);
-//    mesg[0] = "<C>You typed the following: ";
-//    mesg[1] = nick;
-//    mesg[2] = pass;
-//    mesg[3] = "";
-//    mesg[4] = "<C>Press any key to continue.";
-//    popupLabel (userData->cdk_screen, (CDK_CSTRING2) mesg, 4);
-//    return (TRUE);
+    auto err = coordinator.lock()->authorize(userData->nickname, userData->password);
+    if (!err)
+        return (FALSE);
+
+
+    const char *mesg[10];
+    char nick[256];
+    sprintf (nick, "<C>Nickname: (%.*s)", (int)(sizeof (nick) - 10), userData->nickname);
+    char pass[256];
+    sprintf (pass, "<C>Password: (%.*s)", (int)(sizeof (pass) - 10), userData->password);
+    mesg[0] = "<C>You typed the following: ";
+    mesg[1] = nick;
+    mesg[2] = pass;
+    mesg[3] = "";
+    mesg[4] = "<C>Press any key to continue.";
+    popupLabel (userData->cdk_screen, (CDK_CSTRING2) mesg, 4);
+    return (TRUE);
 }
 

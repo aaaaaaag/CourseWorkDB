@@ -16,7 +16,7 @@ namespace polytour::ui {
 
         void setFactory(std::shared_ptr<IWindowsFactory> factory);
 
-        void authorize(const std::string &nick, const std::string &pass) override;
+        std::optional<bl::ErrorObj> authorize(const std::string &nick, const std::string &pass) override;
 
         bl::facade::IMainFacade &getMainAPI() override;
 
