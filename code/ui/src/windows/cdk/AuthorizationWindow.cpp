@@ -2,7 +2,7 @@
 // Created by denis on 02.08.2022.
 //
 
-#include "windows/AuthorizationWindow.h"
+#include "windows/cdk/AuthorizationWindow.h"
 #include "cdk/cdk.h"
 #include <string>
 #include <functional>
@@ -15,7 +15,7 @@ static BINDFN_PROTO (cancel);
 
 typedef struct UserData {
     SScreen* cdk_screen;
-    std::shared_ptr<polytour::ui::ICoordinator> coordinator;
+    std::weak_ptr<polytour::ui::ICoordinator> coordinator;
     const char* nickname;
     const char* password;
 } UserData;
@@ -111,7 +111,7 @@ public:
     };
 
     bool isDestroyed = false;
-    std::shared_ptr<ICoordinator> _pCoordinator;
+    std::weak_ptr<ICoordinator> _pCoordinator;
     SEntry* nick_entry;
     SEntry* pass_entry;
     SButton* authorizationButton;
@@ -122,6 +122,10 @@ public:
 
 polytour::ui::cdk::AuthorizationWindow::AuthorizationWindow(const std::shared_ptr<ICoordinator>& coordinator):
 _pImpl(std::make_unique<Impl>(coordinator)){
+}
+
+void polytour::ui::cdk::AuthorizationWindow::destroy() {
+    _pImpl->destroy();
 }
 
 polytour::ui::cdk::AuthorizationWindow::~AuthorizationWindow() = default;
@@ -168,21 +172,19 @@ static int authorize (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, v
     auto* userData = (UserData*)clientData;
 
     auto coordinator = userData->coordinator;
-    coordinator->authorize(userData->nickname, userData->password);
-
-
-
-    const char *mesg[10];
-    char nick[256];
-    sprintf (nick, "<C>Nickname: (%.*s)", (int)(sizeof (nick) - 10), userData->nickname);
-    char pass[256];
-    sprintf (pass, "<C>Password: (%.*s)", (int)(sizeof (pass) - 10), userData->password);
-    mesg[0] = "<C>You typed the following: ";
-    mesg[1] = nick;
-    mesg[2] = pass;
-    mesg[3] = "";
-    mesg[4] = "<C>Press any key to continue.";
-    popupLabel (userData->cdk_screen, (CDK_CSTRING2) mesg, 4);
-    return (TRUE);
+    coordinator.lock()->authorize(userData->nickname, userData->password);
+//
+//    const char *mesg[10];
+//    char nick[256];
+//    sprintf (nick, "<C>Nickname: (%.*s)", (int)(sizeof (nick) - 10), userData->nickname);
+//    char pass[256];
+//    sprintf (pass, "<C>Password: (%.*s)", (int)(sizeof (pass) - 10), userData->password);
+//    mesg[0] = "<C>You typed the following: ";
+//    mesg[1] = nick;
+//    mesg[2] = pass;
+//    mesg[3] = "";
+//    mesg[4] = "<C>Press any key to continue.";
+//    popupLabel (userData->cdk_screen, (CDK_CSTRING2) mesg, 4);
+//    return (TRUE);
 }
 

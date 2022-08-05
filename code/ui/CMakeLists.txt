@@ -12,9 +12,9 @@ target_include_directories(${PROJECT_NAME}_lib PUBLIC inc)
 
 add_library(${PROJECT_NAME}_lib_cdk STATIC
         src/commonUser/CommonUserWindowsFactory.cpp
-        inc/commonUser/CommonUserWindowsFactory.h
-        src/windows/AuthorizationWindow.cpp
-        inc/windows/AuthorizationWindow.h src/CdkCoordinator.cpp inc/CdkCoordinator.h src/windows/MainMenuWindow.cpp inc/windows/MainMenuWindow.h)
+        inc/windows/cdk/commonUser/CommonUserWindowsFactory.h
+        src/windows/cdk/AuthorizationWindow.cpp
+        inc/windows/cdk/AuthorizationWindow.h src/CdkCoordinator.cpp inc/CdkCoordinator.h src/windows/cdk/MainMenuWindow.cpp inc/windows/cdk/MainMenuWindow.h src/windows/cdk/CdkWindowsFactory.cpp inc/windows/cdk/CdkWindowsFactory.h)
 target_include_directories(${PROJECT_NAME}_lib_cdk PUBLIC inc)
 target_link_libraries (${PROJECT_NAME}_lib_cdk cdk curses ${PROJECT_NAME}_lib transport bl)
 

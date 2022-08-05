@@ -11,6 +11,8 @@ namespace polytour::ui {
 
         virtual ~IWindow() = default;
 
+        virtual void destroy() = 0;
+
     };
 }
 

@@ -5,7 +5,7 @@
 #ifndef COURSEWORKDB_MAINMENUWINDOW_H
 #define COURSEWORKDB_MAINMENUWINDOW_H
 
-#include "IMainMenuWindow.h"
+#include "windows/IMainMenuWindow.h"
 #include "ICoordinator.h"
 #include <memory>
 
@@ -16,6 +16,8 @@ namespace polytour::ui {
         explicit MainMenuWindow(const std::shared_ptr<ICoordinator>& coordinator);
 
         ~MainMenuWindow() override;
+
+        void destroy() override;
 
     private:
 

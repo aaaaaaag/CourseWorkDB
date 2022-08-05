@@ -2,7 +2,7 @@
 // Created by denis on 04.08.2022.
 //
 
-#include "windows/MainMenuWindow.h"
+#include "windows/cdk/MainMenuWindow.h"
 #include <cdk/cdk.h>
 #include <utility>
 #include <vector>
@@ -28,14 +28,19 @@ std::string string_format( const std::string& format, Args ... args )
 class polytour::ui::MainMenuWindow::Impl {
 public:
 
-    explicit Impl(std::shared_ptr<ICoordinator> coordinator):
-    _pCoordinator(std::move(coordinator)){
+    explicit Impl(const std::shared_ptr<ICoordinator>& coordinator):
+    _pCoordinator(coordinator){
         cdkScreen = initCDKScreen(nullptr);
         initCDKColor ();
         initTournamentList();
     }
 
+    void destroy() {
+        injectCDKScroll(tourSelection, KEY_ESC);
+    }
+
     ~Impl() {
+        destroy();
         destroyCDKScroll(tourSelection);
         destroyCDKScreen (cdkScreen);
         endCDK ();
@@ -48,9 +53,8 @@ private:
 
     void initTournamentInfo();
 
-    std::shared_ptr<ICoordinator> _pCoordinator;
+    std::weak_ptr<ICoordinator> _pCoordinator;
     std::vector<transport::Tournament> _vActiveTournaments;
-
 
     SScreen *cdkScreen;
     SScroll* tourSelection{};
@@ -78,7 +82,7 @@ void polytour::ui::MainMenuWindow::Impl::initTournamentList() {
 
     tourSelection = newCDKScroll(
             cdkScreen, CENTER, CENTER, RIGHT, height * 2, 55,
-            "<C> Active tournaments\n   id |      name     | cur_users | max_users | key |",
+            "<C> Active tournaments\n   id |      name     | cur_users | max_users | key | status |",
             &selectionElems[0], selectionElems.size(), TRUE,
             A_REVERSE, TRUE, FALSE
             );
@@ -100,13 +104,12 @@ std::vector<char *> polytour::ui::MainMenuWindow::Impl::getSelectionListElems() 
     std::vector<char *> result;
     std::vector<std::string> preResult;
 
-    auto tournamentAPI = _pCoordinator->getMainAPI().tournamentAPI();
-    _vActiveTournaments = tournamentAPI->getTournaments(
-            {.status_ = transport::Tournament::status_wait_for_participants()});
+    auto tournamentAPI = _pCoordinator.lock()->getMainAPI().tournamentAPI();
+    _vActiveTournaments = tournamentAPI->getTournaments({});
     for (const auto& tournament: _vActiveTournaments) {
-        std::string valueStr = string_format("|%-15s|%-11d|%-11d|%-5d|",
+        std::string valueStr = string_format("|%-15s|%-11d|%-11d|%-5d|%-8s|",
                                              tournament.name.data(), tournament.cur_participants_num,
-                                             tournament.max_participants_num, tournament.id);
+                                             tournament.max_participants_num, tournament.id, tournament.status.data());
         preResult.emplace_back(valueStr);
     }
 
@@ -127,6 +130,10 @@ static int activateScroll (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUS
 
 polytour::ui::MainMenuWindow::MainMenuWindow(const std::shared_ptr<ICoordinator>& coordinator):
 _pImpl(std::make_unique<Impl>(coordinator)){
+}
+
+void polytour::ui::MainMenuWindow::destroy() {
+    _pImpl->destroy();
 }
 
 polytour::ui::MainMenuWindow::~MainMenuWindow() = default;

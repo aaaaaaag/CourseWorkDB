@@ -5,7 +5,7 @@
 #ifndef COURSEWORKDB_AUTHORIZATIONWINDOW_H
 #define COURSEWORKDB_AUTHORIZATIONWINDOW_H
 
-#include "IAuthorizationWindow.h"
+#include "windows/IAuthorizationWindow.h"
 #include "ICoordinator.h"
 #include <memory>
 
@@ -13,9 +13,11 @@ namespace polytour::ui::cdk {
     class AuthorizationWindow : public IAuthorizationWindow {
     public:
 
-        AuthorizationWindow(const std::shared_ptr<ICoordinator>& coordinator);
+        explicit AuthorizationWindow(const std::shared_ptr<ICoordinator>& coordinator);
 
         ~AuthorizationWindow() override;
+
+        void destroy() override;
 
     private:
 

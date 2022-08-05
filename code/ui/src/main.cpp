@@ -1,6 +1,8 @@
-#include "windows/MainMenuWindow.h"
+#include "windows/cdk/MainMenuWindow.h"
 #include "CdkCoordinator.h"
 #include "AuthUserSingleton.h"
+#include "CdkCoordinator.h"
+#include "windows/cdk/CdkWindowsFactory.h"
 
 int main() {
     auto user= polytour::bl::AuthUserSingleton::getInstance();
@@ -8,7 +10,8 @@ int main() {
     user->nickname = "myuser";
 
     auto coordinator = std::make_shared<polytour::ui::CdkCoordinator>();
-    auto mainMenu = std::make_shared<polytour::ui::MainMenuWindow>(coordinator);
+    auto windowsFactory = std::make_shared<polytour::ui::CdkWindowsFactory>(coordinator);
+    coordinator->setFactory(windowsFactory);
 
     return 0;
 }
