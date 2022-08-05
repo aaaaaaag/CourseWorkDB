@@ -26,9 +26,12 @@ namespace polytour::transport {
         utility::NotMandatoryField<int> prev_match_1_id;
         utility::NotMandatoryField<int> prev_match_2_id;
 
-        int getOID() override {
-            return id;
-        }
+        static std::string status_wait_participants(){ return "wait_participants"; }
+        static std::string status_wait_tribes() { return "wait_tribes"; }
+        static std::string status_started() { return "started"; }
+        static std::string status_finished() { return "finished"; };
+
+        int getOID() override { return id; }
 
         struct SearchMatch{
             std::optional<decltype(id)> id_;
