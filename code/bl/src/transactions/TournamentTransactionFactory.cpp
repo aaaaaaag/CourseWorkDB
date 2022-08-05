@@ -6,6 +6,7 @@
 #include <utility>
 #include "repositories/RepositoryFactory.h"
 #include "AuthUserSingleton.h"
+#include "NotCriticalError.h"
 
 void
 polytour::bl::transaction::TournamentTransactionFactory::create(const polytour::transport::Tournament &tournament) {
@@ -64,7 +65,7 @@ void polytour::bl::transaction::TournamentTransactionFactory::leave(const polyto
         .participant_id_ = _curUser.id
     });
     if (participant.size() != 1)
-        throw std::runtime_error("User doesn't take part in passed tournament");
+        throw polytour::NotCriticalError("User doesn't take part in passed tournament");
 
     tournamentParticipantsRepo->deleteObj(participant[0]);
 

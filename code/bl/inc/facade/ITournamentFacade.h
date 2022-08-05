@@ -7,12 +7,13 @@
 
 #include "Tournament.h"
 #include <vector>
+#include "IFacadeErrorProcessor.h"
 
 namespace polytour::bl::facade {
-    class ITournamentFacade {
+    class ITournamentFacade: public IFacadeErrorProcessor{
     public:
 
-        virtual ~ITournamentFacade() = default;
+        ~ITournamentFacade() override = default;
 
         virtual void create(const transport::Tournament& tournament) = 0;
 

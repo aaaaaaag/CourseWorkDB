@@ -7,12 +7,13 @@
 
 #include "Match.h"
 #include <vector>
+#include "IFacadeErrorProcessor.h"
 
 namespace polytour::bl::facade {
-    class IMatchFacade {
+    class IMatchFacade: public IFacadeErrorProcessor{
     public:
 
-        virtual ~IMatchFacade() = default;
+        ~IMatchFacade() override = default;
 
         virtual void create(const transport::Match& match) = 0;
 

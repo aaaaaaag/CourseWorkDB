@@ -8,16 +8,24 @@
 #include "repositories/roles/GuestRole.h"
 
 void polytour::bl::facade::MatchFacade::create(const polytour::transport::Match &match) {
-    _pTransactionFactory->create(match);
+    processError([this, match](){
+        _pTransactionFactory->create(match);
+    });
 }
 
 void polytour::bl::facade::MatchFacade::erase(const polytour::transport::Match &match) {
-    _pTransactionFactory->erase(match);
+    processError([this, match](){
+        _pTransactionFactory->erase(match);
+    });
 }
 
 std::vector<polytour::transport::Match>
 polytour::bl::facade::MatchFacade::getMatches(const polytour::transport::Match::search_t &search) {
-    return _pTransactionFactory->getMatches(search);
+    std::vector<polytour::transport::Match> result;
+    processError([this, search, &result]() {
+        result = _pTransactionFactory->getMatches(search);
+    });
+    return result;
 }
 
 polytour::bl::facade::MatchFacade::MatchFacade():

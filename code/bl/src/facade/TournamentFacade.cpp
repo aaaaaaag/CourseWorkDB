@@ -9,16 +9,24 @@
 
 
 void polytour::bl::facade::TournamentFacade::create(const polytour::transport::Tournament &tournament) {
-    _pTransactionFactory->create(tournament);
+    processError([this, tournament](){
+        _pTransactionFactory->create(tournament);
+    });
 }
 
 void polytour::bl::facade::TournamentFacade::remove(const polytour::transport::Tournament &tournament) {
-    _pTransactionFactory->erase(tournament);
+    processError([this, tournament](){
+        _pTransactionFactory->erase(tournament);
+    });
 }
 
 std::vector<polytour::transport::Tournament>
 polytour::bl::facade::TournamentFacade::getTournaments(const polytour::transport::Tournament::search_t &search) {
-    return _pTransactionFactory->search(search);
+    std::vector<polytour::transport::Tournament> result;
+    processError([this, search, &result]() {
+        result = _pTransactionFactory->search(search);
+    });
+    return result;
 }
 
 polytour::bl::facade::TournamentFacade::TournamentFacade():

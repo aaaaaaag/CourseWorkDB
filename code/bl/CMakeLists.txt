@@ -24,7 +24,7 @@ add_library(${PROJECT_NAME} STATIC
         src/facade/TournamentFacade.cpp
         inc/facade/TournamentFacade.h
         src/facade/MatchFacade.cpp
-        inc/facade/MatchFacade.h src/facade/MainFacade.cpp inc/facade/MainFacade.h)
+        inc/facade/MatchFacade.h src/facade/MainFacade.cpp inc/facade/MainFacade.h inc/facade/IFacadeErrorProcessor.h src/ErrorObj.cpp inc/ErrorObj.h)
 
 target_link_libraries(${PROJECT_NAME} transport db)
 target_include_directories(${PROJECT_NAME} PUBLIC inc)

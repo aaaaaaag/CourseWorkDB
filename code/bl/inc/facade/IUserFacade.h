@@ -8,12 +8,13 @@
 #include <vector>
 #include <string>
 #include "User.h"
+#include "IFacadeErrorProcessor.h"
 
 namespace polytour::bl::facade {
-    class IUserFacade {
+    class IUserFacade: public IFacadeErrorProcessor{
     public:
 
-        virtual ~IUserFacade() = default;
+        ~IUserFacade() override = default;
 
         virtual void auth(const std::string& nick, const std::string& pass) = 0;
 
