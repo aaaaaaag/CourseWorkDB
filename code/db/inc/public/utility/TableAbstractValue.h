@@ -7,6 +7,7 @@
 
 #include "BaseDefines.h"
 #include <any>
+#include <optional>
 
 namespace polytour {
 namespace db {

@@ -62,41 +62,6 @@ polytour::db::repository::UserRepository::fromFieldSet(const polytour::db::utili
     return result;
 }
 
-polytour::db::repository::Identity polytour::db::repository::UserRepository::getIdentity() {
-    Identity result;
-
-    result.tableName = "users";
-    result.tableColumns.emplace(ID_KEY, Identity::column_description_t{
-        .type = utility::TableTypes::Int,
-        .mandatory = utility::FieldMandatory::NotNull
-    });
-    result.tableColumns.emplace(NAME_KEY, Identity::column_description_t{
-            .type = utility::TableTypes::String,
-            .mandatory = utility::FieldMandatory::NotNull
-    });
-    result.tableColumns.emplace(SURNAME_KEY, Identity::column_description_t{
-            .type = utility::TableTypes::String,
-            .mandatory = utility::FieldMandatory::MayBeNull
-    });
-    result.tableColumns.emplace(NICKNAME_KEY, Identity::column_description_t{
-            .type = utility::TableTypes::String,
-            .mandatory = utility::FieldMandatory::NotNull
-    });
-    result.tableColumns.emplace(AGE_KEY, Identity::column_description_t{
-            .type = utility::TableTypes::Int,
-            .mandatory = utility::FieldMandatory::MayBeNull
-    });
-    result.tableColumns.emplace(EMAIL_KEY, Identity::column_description_t{
-            .type = utility::TableTypes::String,
-            .mandatory = utility::FieldMandatory::NotNull
-    });
-    result.tableColumns.emplace(PASSWORD_KEY, Identity::column_description_t{
-            .type = utility::TableTypes::String,
-            .mandatory = utility::FieldMandatory::NotNull
-    });
-    return result;
-}
-
 polytour::db::utility::FieldSet
 polytour::db::repository::UserRepository::toFieldSet(const polytour::transport::User::search_t &obj) {
     utility::FieldSet result;
@@ -124,5 +89,40 @@ polytour::db::repository::UserRepository::toFieldSet(const polytour::transport::
         result.addPair(EMAIL_KEY, utility::TableAbstractValue(obj.email_.value()));
     if (obj.password_.has_value())
         result.addPair(PASSWORD_KEY, utility::TableAbstractValue(obj.password_.value()));
+    return result;
+}
+
+polytour::db::repository::Identity polytour::db::repository::UserRepository::getIdentity() {
+    Identity result;
+
+    result.tableName = "users";
+    result.tableColumns.emplace(ID_KEY, Identity::column_description_t{
+            .type = utility::TableTypes::Serial,
+            .mandatory = utility::FieldMandatory::NotNull
+    });
+    result.tableColumns.emplace(NAME_KEY, Identity::column_description_t{
+            .type = utility::TableTypes::String,
+            .mandatory = utility::FieldMandatory::NotNull
+    });
+    result.tableColumns.emplace(SURNAME_KEY, Identity::column_description_t{
+            .type = utility::TableTypes::String,
+            .mandatory = utility::FieldMandatory::MayBeNull
+    });
+    result.tableColumns.emplace(NICKNAME_KEY, Identity::column_description_t{
+            .type = utility::TableTypes::String,
+            .mandatory = utility::FieldMandatory::NotNull
+    });
+    result.tableColumns.emplace(AGE_KEY, Identity::column_description_t{
+            .type = utility::TableTypes::Int,
+            .mandatory = utility::FieldMandatory::MayBeNull
+    });
+    result.tableColumns.emplace(EMAIL_KEY, Identity::column_description_t{
+            .type = utility::TableTypes::String,
+            .mandatory = utility::FieldMandatory::NotNull
+    });
+    result.tableColumns.emplace(PASSWORD_KEY, Identity::column_description_t{
+            .type = utility::TableTypes::String,
+            .mandatory = utility::FieldMandatory::NotNull
+    });
     return result;
 }

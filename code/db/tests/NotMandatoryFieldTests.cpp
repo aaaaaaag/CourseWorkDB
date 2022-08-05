@@ -8,7 +8,7 @@
 namespace polytour::db::tests::utility {
 
     TEST(NotMandatoryField, nullValue) {
-        auto field = db::utility::NotMandatoryField<int>(std::nullopt);
+        auto field = transport::utility::NotMandatoryField<int>(std::nullopt);
         EXPECT_FALSE(field.hasValue());
         EXPECT_THROW(field.getValue(), std::logic_error);
         EXPECT_TRUE(field.isNull());
@@ -16,7 +16,7 @@ namespace polytour::db::tests::utility {
     }
 
     TEST(NotMandatoryField, withValue) {
-        auto field = db::utility::NotMandatoryField<int>(5);
+        auto field = transport::utility::NotMandatoryField<int>(5);
         EXPECT_TRUE(field.hasValue());
         EXPECT_NO_THROW(field.getValue());
         EXPECT_FALSE(field.isNull());

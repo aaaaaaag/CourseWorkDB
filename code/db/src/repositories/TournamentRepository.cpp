@@ -84,7 +84,7 @@ polytour::db::repository::Identity polytour::db::repository::TournamentRepositor
 
     result.tableName = "tournaments";
     result.tableColumns.emplace(ID_KEY, Identity::column_description_t{
-            .type = utility::TableTypes::Int,
+            .type = utility::TableTypes::Serial,
             .mandatory = utility::FieldMandatory::NotNull
     });
     result.tableColumns.emplace(NAME_KEY, Identity::column_description_t{

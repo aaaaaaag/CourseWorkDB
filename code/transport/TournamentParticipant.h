@@ -2,8 +2,8 @@
 // Created by denis on 7/23/22.
 //
 
-#ifndef COURSEWORKDB_TOURNAMENTPARTICIPANTS_H
-#define COURSEWORKDB_TOURNAMENTPARTICIPANTS_H
+#ifndef COURSEWORKDB_TOURNAMENTPARTICIPANT_H
+#define COURSEWORKDB_TOURNAMENTPARTICIPANT_H
 
 #include "IIdentifiable.h"
 #include "NotMandatoryField.h"
@@ -11,21 +11,21 @@
 #include <optional>
 
 namespace polytour::transport {
-    class TournamentParticipants: public IIdentifiable{
+    class TournamentParticipant: public IIdentifiable{
     public:
         int id;
         int tournament_id;
         int participant_id;
         int getOID() override {return id;}
 
-        struct SearchTournamentParticipants{
+        struct SearchTournamentParticipant{
             std::optional<decltype(id)> id_;
             std::optional<decltype(tournament_id)> tournament_id_;
             std::optional<decltype(participant_id)> participant_id_;
         };
 
-        using search_t = SearchTournamentParticipants;
+        using search_t = SearchTournamentParticipant;
     };
 }
 
-#endif //COURSEWORKDB_TOURNAMENTPARTICIPANTS_H
+#endif //COURSEWORKDB_TOURNAMENTPARTICIPANT_H

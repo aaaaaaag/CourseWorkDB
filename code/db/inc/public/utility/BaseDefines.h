@@ -15,6 +15,7 @@ namespace utility {
     enum class TableTypes{
         Int = 0,
         String,
+        Serial,
         Null
     };
 

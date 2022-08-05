@@ -72,19 +72,18 @@ polytour::db::utility::PostgreSqlCommandSource::initTable(const polytour::db::re
         curColumn += " ";
         switch (column.second.type) {
             case TableTypes::Int:
-                curColumn += "int";
-                break;
+                curColumn += "int"; break;
             case TableTypes::String:
-                curColumn += "text";
-                break;
+                curColumn += "text"; break;
+            case TableTypes::Serial:
+                curColumn += "serial"; break;
             case TableTypes::Null:
             default:
                 throw std::logic_error("Table column has invalid type");
         }
         switch (column.second.mandatory) {
             case FieldMandatory::NotNull:
-                curColumn += " not null";
-                break;
+                curColumn += " not null"; break;
             default:
                 break;
         }
@@ -100,6 +99,8 @@ std::string polytour::db::utility::PostgreSqlCommandSource::buildValuesList(cons
                                                                             const repository::Identity& repoIdentity) {
     std::string result = "(";
     for (const auto& column: repoIdentity.tableColumns) {
+        if (column.second.type == TableTypes::Serial)
+            continue;
         auto columnName = column.first;
         if (fieldSet.has_value_under_key(columnName))
             result += valueToSQLCommandView(fieldSet[columnName], columnName,
@@ -163,6 +164,7 @@ std::string polytour::db::utility::PostgreSqlCommandSource::valueToSQLCommandVie
         const FieldSet::value_t& value, const std::string& column_name, TableTypes columnType, FieldMandatory mandatory) {
     std::string stringExpectedType;
     switch (columnType) {
+        case TableTypes::Serial:
         case TableTypes::Int:
             if (value.isInt()) return std::to_string(value.toInt());
             else stringExpectedType = "int";
@@ -184,8 +186,10 @@ std::string polytour::db::utility::PostgreSqlCommandSource::valueToSQLCommandVie
 std::string polytour::db::utility::PostgreSqlCommandSource::buildColumnsList(const repository::Identity& repoIdentity) {
     std::string result = "(";
     for (const auto& column: repoIdentity.tableColumns) {
-        result += column.first;
-        result += ", ";
+        if (column.second.type != TableTypes::Serial) {
+            result += column.first;
+            result += ", ";
+        }
     }
     result.erase(result.size() - 2);
     result += ")";

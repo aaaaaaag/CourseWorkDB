@@ -181,9 +181,9 @@ polytour::db::repository::MatchRepository::fromFieldSet(const polytour::db::util
 polytour::db::repository::Identity polytour::db::repository::MatchRepository::getIdentity() {
     Identity result;
 
-    result.tableName = "users";
+    result.tableName = "matches";
     result.tableColumns.emplace(ID_KEY, Identity::column_description_t{
-            .type = utility::TableTypes::Int,
+            .type = utility::TableTypes::Serial,
             .mandatory = utility::FieldMandatory::NotNull
     });
     result.tableColumns.emplace(TOURNAMENT_ID_KEY, Identity::column_description_t{
