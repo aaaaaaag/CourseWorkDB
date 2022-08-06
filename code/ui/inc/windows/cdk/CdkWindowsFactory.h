@@ -22,6 +22,8 @@ namespace polytour::ui {
 
         std::unique_ptr<IWindow> createUserInfoWindow() override;
 
+        std::unique_ptr<IWindow> createSignUpWindow() override;
+
     private:
 
         std::weak_ptr<ICoordinator> _pCoordinator;

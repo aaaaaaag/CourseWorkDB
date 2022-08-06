@@ -31,3 +31,22 @@ polytour::ui::CdkCoordinator::CdkCoordinator():
 _pWindowsFactory(nullptr),
 _pMainFacade(std::make_unique<bl::facade::MainFacade>()){
 }
+
+std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::signUp(polytour::transport::User user) {
+    _pMainFacade->userAPI()->regNewUser(user);
+    if (_pMainFacade->userAPI()->isError())
+        return _pMainFacade->userAPI()->getError();
+    toSignIn();
+}
+
+std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::toSignIn() {
+    //_pCurrentWindow->destroy();
+    _pCurrentWindow = _pWindowsFactory->createAuthorizationWindow();
+    return std::nullopt;
+}
+
+std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::toSignUp() {
+    //_pCurrentWindow->destroy();
+    _pCurrentWindow = _pWindowsFactory->createSignUpWindow();
+    return std::nullopt;
+}

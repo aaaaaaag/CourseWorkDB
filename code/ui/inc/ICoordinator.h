@@ -19,6 +19,12 @@ namespace polytour::ui {
 
         virtual polytour::bl::facade::IMainFacade& getMainAPI() = 0;
 
+        virtual std::optional<bl::ErrorObj> signUp(transport::User user) = 0;
+
+        virtual std::optional<bl::ErrorObj> toSignIn() = 0;
+
+        virtual std::optional<bl::ErrorObj> toSignUp() = 0;
+
     };
 }
 

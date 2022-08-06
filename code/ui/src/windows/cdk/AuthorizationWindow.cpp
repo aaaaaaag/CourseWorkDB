@@ -8,22 +8,17 @@
 #include <functional>
 #include <utility>
 
-static BINDFN_PROTO (activateEntry);
-static BINDFN_PROTO (activateButton);
-static BINDFN_PROTO (authorize);
-static BINDFN_PROTO (cancel);
-
-typedef struct UserData {
-    SScreen* cdk_screen;
-    std::weak_ptr<polytour::ui::ICoordinator> coordinator;
-    const char* nickname;
-    const char* password;
-} UserData;
-
 class polytour::ui::cdk::AuthorizationWindow::Impl {
 public:
 
-    explicit Impl(std::shared_ptr<ICoordinator> coordinator): _pCoordinator(std::move(coordinator)) {
+    typedef struct UserData {
+        SScreen* cdk_screen;
+        std::weak_ptr<polytour::ui::ICoordinator> coordinator;
+        const char* nickname;
+        const char* password;
+    } UserData;
+
+    explicit Impl(const std::shared_ptr<ICoordinator>& coordinator): _pCoordinator(coordinator) {
         cdkScreen = initCDKScreen(nullptr);
         initCDKColor ();
 
@@ -62,6 +57,10 @@ public:
         setCDKButtonboxURChar (cancelButton, ACS_RTEE);
         setCDKButtonboxLLChar (cancelButton, ACS_LLCORNER);
 
+        // Init sign up button
+        std::string signUpName = "<C>" + std::string(width / 2 - 4, ' ') + "Sign up " + std::string(width / 2 - 4, ' ');
+        signUpButton = newCDKButton(cdkScreen, CENTER, BOTTOM, signUpName.data(), nullptr, TRUE, FALSE);
+
         // Init logo
         const char* label_text[] = {"               </B/K/5> Polytour <!B!K!5>                "};
         logo = newCDKLabel(cdkScreen, CENTER,
@@ -82,10 +81,12 @@ public:
         bindCDKObject (vENTRY, pass_entry, KEY_TAB, activateButton, authorizationButton);
         bindCDKObject (vENTRY, pass_entry, KEY_ENTER, activateButton, authorizationButton);
         bindCDKObject (vBUTTON, authorizationButton, KEY_TAB, activateButton, cancelButton);
-        bindCDKObject (vBUTTON, cancelButton, KEY_TAB, activateEntry, nick_entry);
+        bindCDKObject (vBUTTON, cancelButton, KEY_TAB, activateButton, signUpButton);
+        bindCDKObject (vBUTTON, signUpButton, KEY_TAB, activateEntry, nick_entry);
         std::function<void()> cancelFunc = [this](){destroy();};
         bindCDKObject (vBUTTON, cancelButton, KEY_ENTER, cancel, &cancelFunc);
         bindCDKObject(vBUTTON, authorizationButton, KEY_ENTER, authorize, &userData);
+        bindCDKObject(vBUTTON, signUpButton, KEY_ENTER, toSignUp, &userData);
 
         refreshCDKScreen (cdkScreen);
         (void)activateCDKEntry (nick_entry, nullptr);
@@ -102,6 +103,7 @@ public:
 
         destroyCDKButton(cancelButton);
         destroyCDKButton(authorizationButton);
+        destroyCDKButton(signUpButton);
         destroyCDKLabel(logo);
         destroyCDKEntry (pass_entry);
         destroyCDKEntry (nick_entry);
@@ -116,8 +118,16 @@ public:
     SEntry* pass_entry;
     SButton* authorizationButton;
     SButton* cancelButton;
+    SButton* signUpButton;
     SLabel* logo;
     SScreen* cdkScreen;
+
+    static BINDFN_PROTO (activateEntry);
+    static BINDFN_PROTO (activateButton);
+    static BINDFN_PROTO (authorize);
+    static BINDFN_PROTO (cancel);
+    static BINDFN_PROTO (toSignUp);
+
 };
 
 polytour::ui::cdk::AuthorizationWindow::AuthorizationWindow(const std::shared_ptr<ICoordinator>& coordinator):
@@ -140,7 +150,8 @@ static int deactivateObj(EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED
     return (TRUE);
 }
 
-static int activateEntry (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void *clientData, chtype key)
+int polytour::ui::cdk::AuthorizationWindow::Impl::activateEntry(
+        EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void *clientData, chtype key)
 {
     if (!deactivateObj(cdktype, object)) return (FALSE);
 
@@ -149,7 +160,8 @@ static int activateEntry (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSE
     return (TRUE);
 }
 
-static int activateButton (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void *clientData, chtype key)
+int polytour::ui::cdk::AuthorizationWindow::Impl::activateButton(
+        EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void *clientData, chtype key)
 {
     if (!deactivateObj(cdktype, object)) return (FALSE);
 
@@ -158,7 +170,8 @@ static int activateButton (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUS
     return (TRUE);
 }
 
-static int cancel (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void *clientData, chtype key)
+int polytour::ui::cdk::AuthorizationWindow::Impl::cancel(
+        EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void *clientData, chtype key)
 {
     chtype esc = KEY_ESC;
     (void) activateCDKButton((CDKBUTTON*)object, &esc);
@@ -167,7 +180,8 @@ static int cancel (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void
     return (TRUE);
 }
 
-static int authorize (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void *clientData, chtype key)
+int polytour::ui::cdk::AuthorizationWindow::Impl::authorize (
+        EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void *clientData, chtype key)
 {
     auto* userData = (UserData*)clientData;
 
@@ -188,6 +202,19 @@ static int authorize (EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, v
     mesg[3] = "";
     mesg[4] = "<C>Press any key to continue.";
     popupLabel (userData->cdk_screen, (CDK_CSTRING2) mesg, 4);
+    return (TRUE);
+}
+
+int polytour::ui::cdk::AuthorizationWindow::Impl::toSignUp(
+        EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED, void *clientData, chtype key)
+{
+    auto* userData = (UserData*)clientData;
+
+    auto coordinator = userData->coordinator;
+    auto err = coordinator.lock()->toSignUp();
+    if (!err)
+        injectCDKButton((CDKBUTTON*)object, KEY_ESC);
+        return (FALSE);
     return (TRUE);
 }
 

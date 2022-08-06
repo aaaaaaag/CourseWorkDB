@@ -21,6 +21,8 @@ namespace polytour::ui {
         virtual std::unique_ptr<IWindow> createTournamentWindow() = 0;
 
         virtual std::unique_ptr<IWindow> createUserInfoWindow() = 0;
+
+        virtual std::unique_ptr<IWindow> createSignUpWindow() = 0;
     };
 }
 

@@ -20,6 +20,12 @@ namespace polytour::ui {
 
         bl::facade::IMainFacade &getMainAPI() override;
 
+        std::optional<bl::ErrorObj> signUp(transport::User user) override;
+
+        std::optional<bl::ErrorObj> toSignIn() override;
+
+        std::optional<bl::ErrorObj> toSignUp() override;
+
     private:
 
         std::unique_ptr<IWindow> _pCurrentWindow;
