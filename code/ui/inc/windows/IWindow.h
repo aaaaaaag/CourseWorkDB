@@ -13,6 +13,8 @@ namespace polytour::ui {
 
         virtual void destroy() = 0;
 
+        virtual void init() = 0;
+
     };
 }
 

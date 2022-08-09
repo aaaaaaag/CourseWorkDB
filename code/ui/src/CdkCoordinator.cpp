@@ -11,11 +11,8 @@ std::optional<polytour::bl::ErrorObj>
 polytour::ui::CdkCoordinator::authorize(const std::string &nick, const std::string &pass) {
     _pMainFacade->userAPI()->auth(nick, pass);
     auto error = _pMainFacade->userAPI()->getError();
-    if (error)
-        return error;
-    //_pCurrentWindow->destroy();
-    _pCurrentWindow = _pWindowsFactory->createMainMenuWindow();
-    return std::nullopt;
+    if (error) return error;
+    return toMainMenu();
 }
 
 polytour::bl::facade::IMainFacade &polytour::ui::CdkCoordinator::getMainAPI() {
@@ -24,7 +21,8 @@ polytour::bl::facade::IMainFacade &polytour::ui::CdkCoordinator::getMainAPI() {
 
 void polytour::ui::CdkCoordinator::setFactory(std::shared_ptr<IWindowsFactory> factory) {
     _pWindowsFactory = std::move(factory);
-    _pCurrentWindow = _pWindowsFactory->createAuthorizationWindow();
+    _pCurrentWindow = std::move(_pWindowsFactory->createAuthorizationWindow());
+    _pCurrentWindow->init();
 }
 
 polytour::ui::CdkCoordinator::CdkCoordinator():
@@ -40,13 +38,31 @@ std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::signUp(polyt
 }
 
 std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::toSignIn() {
-    //_pCurrentWindow->destroy();
+    _pCurrentWindow->destroy();
     _pCurrentWindow = _pWindowsFactory->createAuthorizationWindow();
+    _pCurrentWindow->init();
     return std::nullopt;
 }
 
 std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::toSignUp() {
-    //_pCurrentWindow->destroy();
+    _pCurrentWindow->destroy();
     _pCurrentWindow = _pWindowsFactory->createSignUpWindow();
+    _pCurrentWindow->init();
+    return std::nullopt;
+}
+
+std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::toMainMenu() {
+    _pCurrentWindow->destroy();
+    _pCurrentWindow = nullptr;
+    _pCurrentWindow = _pWindowsFactory->createMainMenuWindow();
+    _pCurrentWindow->init();
+    return std::nullopt;
+}
+
+std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::toUpdateUser() {
+    _pCurrentWindow->destroy();
+    _pCurrentWindow = nullptr;
+    _pCurrentWindow = _pWindowsFactory->createUserInfoWindow();
+    _pCurrentWindow->init();
     return std::nullopt;
 }

@@ -26,6 +26,10 @@ namespace polytour::ui {
 
         std::optional<bl::ErrorObj> toSignUp() override;
 
+        std::optional<bl::ErrorObj> toMainMenu() override;
+
+        std::optional<bl::ErrorObj> toUpdateUser() override;
+
     private:
 
         std::unique_ptr<IWindow> _pCurrentWindow;

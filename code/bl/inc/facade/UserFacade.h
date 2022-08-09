@@ -15,6 +15,8 @@ namespace polytour::bl::facade {
 
         UserFacade();
 
+        transport::User currentUser() override;
+
         void auth(const std::string &nick, const std::string &pass) override;
 
         std::vector<transport::User> getUsers(transport::User::search_t search) override;
@@ -22,6 +24,8 @@ namespace polytour::bl::facade {
         void deleteUser(const transport::User &user) override;
 
         void regNewUser(const transport::User &user) override;
+
+        void updateUser(const transport::User &user) override;
 
     private:
 

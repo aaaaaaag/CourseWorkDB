@@ -18,92 +18,164 @@
 //
 //    return 0;
 //}
-
-/* $Id: uslider_ex.c,v 1.5 2016/12/04 15:22:16 tom Exp $ */
+/* $Id: marquee_ex.c,v 1.13 2016/12/04 15:22:16 tom Exp $ */
 
 #include <cdk/cdk.h>
 
 #ifdef HAVE_XCURSES
-char *XCursesProgramName = "uslider_ex";
+char *XCursesProgramName = "marquee_ex";
 #endif
 
+static char startAttr[100];
+static char endAttr[100];
+
 /*
- * This program demonstrates the Cdk unsigned-slider widget.
+ * This spits out help about this demo program.
  */
+static void help (char *programName)
+{
+    const char *USAGE = "[-m Message] [-R repeat value] [-d delay value] [-b|r|u|k] [-h]";
+
+    printf ("Usage: %s %s\n", programName, USAGE);
+    printf (" -m TEXT   Sets the message to display in the marquee\n");
+    printf ("           If no message is provided, one will be created.\n");
+    printf (" -R COUNT  Repeat the message the given COUNT.\n");
+    printf ("           A of -1 repeats the message forever.\n");
+    printf (" -d COUNT  number of milliseconds to delay between repeats.\n");
+    printf (" -b        display the message with the bold attribute.\n");
+    printf (" -r        display the message with a reversed attribute.\n");
+    printf (" -u        display the message with an underline attribute.\n");
+    printf (" -k        display the message with the blinking attribute.\n");
+}
+
+static void myParseAttr (CDK_PARAMS * params, int lower, int upper)
+{
+    if (CDKparamString (params, lower) != 0)
+    {
+        char starting[3];
+        char ending[3];
+
+        if (startAttr[0] == '\0')
+        {
+            startAttr[0] = '<';
+            endAttr[0] = '<';
+        }
+        sprintf (starting, "/%c", upper);
+        sprintf (ending, "!%c", upper);
+        strcat (startAttr, starting);
+        strcat (endAttr, ending);
+    }
+}
+
 int main (int argc, char **argv)
 {
-    /* *INDENT-EQLS* */
-    CDKSCREEN *cdkscreen = 0;
-    CDKUSLIDER *widget   = 0;
-    char title[256];
-    const char *label    = "</B>Current Value:";
-    const char *mesg[5];
-    char temp[256];
-    unsigned selection;
+    /* *INDENT-OFF* */
+    CDKSCREEN	*cdkscreen;
+    CDKMARQUEE	*scrollMessage;
+    char		message[1024];
+    time_t	clck;
 
-    CDK_PARAMS params;
-    unsigned high;
-    unsigned inc;
-    unsigned low;
+    CDK_PARAMS   params;
+    char         *mesg;
+    int          delay;
+    int          repeat;
+    /* *INDENT-ON* */
 
-    /* *INDENT-EQLS* */
-    CDKparseParams (argc, argv, &params, "h:i:l:w:" CDK_MIN_PARAMS);
-    high   = (unsigned)CDKparamNumber2 (&params, 'h', 100);
-    inc    = (unsigned)CDKparamNumber2 (&params, 'i', 1);
-    low    = (unsigned)CDKparamNumber2 (&params, 'l', 1);
 
-    sprintf (title, "<C></U>Enter a value:\nLow  %#x\nHigh %#x", low, high);
+    CDKparseParams (argc, argv, &params, "brkud:R:m:hw:" CDK_MIN_PARAMS);
+    myParseAttr (&params, 'b', 'B');
+    myParseAttr (&params, 'r', 'R');
+    myParseAttr (&params, 'k', 'K');
+    myParseAttr (&params, 'u', 'U');
+    repeat = CDKparamNumber2 (&params, 'R', 3);
+    delay = CDKparamNumber2 (&params, 'd', 5);
+    mesg = CDKparamString (&params, 'm');
+
+    if (CDKparamString (&params, 'h') != 0)
+        help (argv[0]);
+
+    /* Clean up the strings. */
+    cleanChar (message, sizeof (message), '\0');
+    cleanChar (startAttr, sizeof (startAttr), '\0');
+    cleanChar (endAttr, sizeof (endAttr), '\0');
+
+    /* Put the end of the attributes if they asked for then. */
+    if (startAttr[0] == '<')
+    {
+        strcat (startAttr, ">");
+        strcat (endAttr, ">");
+    }
 
     cdkscreen = initCDKScreen (NULL);
+    curs_set (0);
 
     /* Start CDK Colors. */
     initCDKColor ();
 
-    /* Create the widget. */
-    widget = newCDKUSlider (cdkscreen,
-                            CDKparamValue (&params, 'X', CENTER),
-                            CDKparamValue (&params, 'Y', CENTER),
-                            title, label,
-                            A_REVERSE | COLOR_PAIR (29) | ' ',
-                            CDKparamNumber2 (&params, 'w', 50),
-                            low, low, high,
-                            inc, (inc * 2),
-                            CDKparamValue (&params, 'N', TRUE),
-                            CDKparamValue (&params, 'S', FALSE));
+    /* Create the marquee. */
+    scrollMessage = newCDKMarquee (cdkscreen,
+                                   CDKparamValue (&params, 'X', CENTER),
+                                   CDKparamValue (&params, 'Y', TOP),
+                                   CDKparamValue (&params, 'w', 30),
+                                   CDKparamValue (&params, 'N', FALSE),
+                                   CDKparamValue (&params, 'S', TRUE));
 
-    /* Is the widget null? */
-    if (widget == 0)
+    /* Check if the marquee is null. */
+    if (scrollMessage == 0)
     {
-        /* Exit CDK. */
+        /* Exit Cdk. */
         destroyCDKScreen (cdkscreen);
         endCDK ();
 
-        printf ("Cannot make the widget. Is the window too small?\n");
+        printf ("Cannot create the marquee window. Is the window too small?\n");
         return 1;
     }
 
-    /* Activate the widget. */
-    selection = activateCDKUSlider (widget, 0);
+    /* Draw the CDK screen. */
+    refreshCDKScreen (cdkscreen);
 
-    /* Check the exit value of the widget. */
-    if (widget->exitType == vESCAPE_HIT)
+    /* Create the marquee message. */
+    if (mesg == 0)
     {
-        mesg[0] = "<C>You hit escape. No value selected.";
-        mesg[1] = "";
-        mesg[2] = "<C>Press any key to continue.";
-        popupLabel (cdkscreen, (CDK_CSTRING2) mesg, 3);
+        char *currentTime;
+
+        /* Get the current time and chop off the newline. */
+        time (&clck);
+        currentTime = ctime (&clck);
+        currentTime[strlen (currentTime) - 1] = 0;
+
+        if (startAttr[0] != '\0')
+        {
+            currentTime[strlen (currentTime) - 1] = '\0';
+            sprintf (message, "%s%s%s (This Space For Rent) ",
+                     startAttr,
+                     currentTime,
+                     endAttr);
+        }
+        else
+        {
+            sprintf (message, "%s (This Space For Rent) ", currentTime);
+        }
     }
-    else if (widget->exitType == vNORMAL)
+    else
     {
-        sprintf (temp, "<C>You selected %u", selection);
-        mesg[0] = temp;
-        mesg[1] = "";
-        mesg[2] = "<C>Press any key to continue.";
-        popupLabel (cdkscreen, (CDK_CSTRING2) mesg, 3);
+        if (startAttr[0] != '\0')
+        {
+            sprintf (message, "%s%s%s ", startAttr, mesg, endAttr);
+        }
+        else
+        {
+            sprintf (message, "%s ", mesg);
+        }
     }
+
+    /* Run the marquee. */
+    activateCDKMarquee (scrollMessage, message, delay, repeat, TRUE);
+    activateCDKMarquee (scrollMessage, message, delay, repeat, FALSE);
+    activateCDKMarquee (scrollMessage, message, delay, repeat, TRUE);
 
     /* Clean up. */
-    destroyCDKUSlider (widget);
+    destroyCDKMarquee (scrollMessage);
     destroyCDKScreen (cdkscreen);
     endCDK ();
     return 0;

@@ -1,13 +1,14 @@
 //
-// Created by denis on 06.08.2022.
+// Created by denis on 08.08.2022.
 //
 
-#include "windows/cdk/SignUpWindow.h"
+#include "windows/cdk/UpdateUserWindow.h"
 #include "cdk/cdk.h"
+#include "AuthUserSingleton.h"
 #include "User.h"
 #include <cstring>
 
-class polytour::ui::cdk::SignUpWindow::Impl {
+class polytour::ui::cdk::UpdateUserWindow::Impl {
 public:
 
     explicit Impl(const std::shared_ptr<ICoordinator>& coordinator);
@@ -33,6 +34,7 @@ private:
     static int yPrevFrom(SEntry* entry);
     static int deactivateObj(EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED);
     static polytour::transport::User userDataToUser(const UserData& userdata);
+    static void setFillField(SEntry* entry, const std::string& field);
 
     std::weak_ptr<ICoordinator> _pCoordinator;
 
@@ -47,9 +49,8 @@ private:
     SLabel* logo;
     SLabel* windowName;
 
-    SButton* cancelButton;
-    SButton* signUpButton;
-    SButton* signInButton;
+    SButton* backButton;
+    SButton* saveButton;
 
     bool isDestroyed = false;
 
@@ -57,15 +58,14 @@ private:
 
     static BINDFN_PROTO (activateEntry);
     static BINDFN_PROTO (activateButton);
-    static BINDFN_PROTO (signUp);
-    static BINDFN_PROTO (cancel);
-    static BINDFN_PROTO (toSignIn);
+    static BINDFN_PROTO (save);
+    static BINDFN_PROTO (back);
 };
 
-polytour::ui::cdk::SignUpWindow::Impl::Impl(const std::shared_ptr<ICoordinator> &coordinator):
-_pCoordinator(coordinator) {}
+polytour::ui::cdk::UpdateUserWindow::Impl::Impl(const std::shared_ptr<ICoordinator> &coordinator):
+        _pCoordinator(coordinator) {}
 
-SEntry *polytour::ui::cdk::SignUpWindow::Impl::createEntry(int y, const char* label, const char* name) {
+SEntry *polytour::ui::cdk::UpdateUserWindow::Impl::createEntry(int y, const char* label, const char* name) {
     auto result = newCDKEntry (cdkScreen, CENTER, y, label, name, A_NORMAL, '_', vMIXED,
                                40, 256, 256, TRUE, FALSE);
     setCDKEntryULChar(result, ACS_LTEE);
@@ -74,37 +74,47 @@ SEntry *polytour::ui::cdk::SignUpWindow::Impl::createEntry(int y, const char* la
     setCDKEntryLRChar(result, ACS_RTEE);
 }
 
-int polytour::ui::cdk::SignUpWindow::Impl::yNextTo(SEntry* entry) {
+int polytour::ui::cdk::UpdateUserWindow::Impl::yNextTo(SEntry* entry) {
     return getbegy(entry->win) + entry->boxHeight - 1;
 }
 
-int polytour::ui::cdk::SignUpWindow::Impl::yPrevFrom(SEntry *entry) {
+int polytour::ui::cdk::UpdateUserWindow::Impl::yPrevFrom(SEntry *entry) {
     return getbegy(entry->win) - entry->boxHeight - 1;
 }
 
-void polytour::ui::cdk::SignUpWindow::Impl::destroy() {
+void polytour::ui::cdk::UpdateUserWindow::Impl::destroy() {
     if (isDestroyed)
         return;
-    destroyCDKEntry(nickEntry);
-    destroyCDKEntry(passwordEntry);
-    destroyCDKEntry(nameEntry);
-    destroyCDKEntry(emailEntry);
-    destroyCDKEntry(surnameEntry);
+
+    injectCDKButton(backButton, KEY_ESC);
+    backButton = nullptr;
+    injectCDKButton(saveButton, KEY_ESC);
+    saveButton = nullptr;
+    //deactivateObj(vENTRY, nickEntry);
+    injectCDKEntry(nickEntry, KEY_ESC);
+
+
+    destroyCDKButton(backButton);
+    destroyCDKButton(saveButton);
+
     destroyCDKEntry(ageEntry);
+    destroyCDKEntry(surnameEntry);
+    destroyCDKEntry(emailEntry);
+    destroyCDKEntry(nameEntry);
+    destroyCDKEntry(passwordEntry);
+    destroyCDKEntry(nickEntry);
+    nickEntry = nullptr;
 
     destroyCDKLabel(logo);
     destroyCDKLabel(windowName);
 
-    destroyCDKButton(cancelButton);
-    destroyCDKButton(signInButton);
-    destroyCDKButton(signUpButton);
 
     destroyCDKScreen (cdkScreen);
     endCDK ();
     isDestroyed = true;
 }
 
-int polytour::ui::cdk::SignUpWindow::Impl::activateEntry(EObjectType objType, void * obj, void * clientData, chtype key) {
+int polytour::ui::cdk::UpdateUserWindow::Impl::activateEntry(EObjectType objType, void * obj, void * clientData, chtype key) {
     if (!deactivateObj(objType, obj)) return (FALSE);
 
     auto *entry = (CDKENTRY *)clientData;
@@ -112,7 +122,7 @@ int polytour::ui::cdk::SignUpWindow::Impl::activateEntry(EObjectType objType, vo
     return (TRUE);
 }
 
-int polytour::ui::cdk::SignUpWindow::Impl::activateButton(EObjectType objType, void * obj, void * clientData, chtype key) {
+int polytour::ui::cdk::UpdateUserWindow::Impl::activateButton(EObjectType objType, void * obj, void * clientData, chtype key) {
     if (!deactivateObj(objType, obj)) return (FALSE);
 
     auto *buttonbox = (CDKBUTTON *)clientData;
@@ -120,7 +130,7 @@ int polytour::ui::cdk::SignUpWindow::Impl::activateButton(EObjectType objType, v
     return (TRUE);
 }
 
-int polytour::ui::cdk::SignUpWindow::Impl::deactivateObj(EObjectType cdktype, void *object) {
+int polytour::ui::cdk::UpdateUserWindow::Impl::deactivateObj(EObjectType cdktype, void *object) {
     chtype esc = KEY_ESC;
     if (cdktype == vBUTTON)
         (void) activateCDKButton((CDKBUTTON*)object, &esc);
@@ -130,44 +140,45 @@ int polytour::ui::cdk::SignUpWindow::Impl::deactivateObj(EObjectType cdktype, vo
     return (TRUE);
 }
 
-int polytour::ui::cdk::SignUpWindow::Impl::cancel(EObjectType objType, void * obj, void *data, chtype key) {
-    chtype esc = KEY_ESC;
-    (void) activateCDKButton((CDKBUTTON*)obj, &esc);
-    auto cancelFunc = (std::function<void()>*)data;
-    (*cancelFunc)();
-    return (TRUE);
-}
-
-int polytour::ui::cdk::SignUpWindow::Impl::signUp(EObjectType objType, void * obj, void *data, chtype key) {
+int polytour::ui::cdk::UpdateUserWindow::Impl::back(EObjectType objType, void * obj, void *data, chtype key) {
     auto* userData = (UserData*)data;
 
     auto coordinator = userData->coordinator;
-    auto err = coordinator.lock()->signUp(userDataToUser(*userData));
+    deactivateObj(objType, obj);
+    auto err = coordinator.lock()->toMainMenu();
     if (!err)
         return (FALSE);
+    return (TRUE);
+}
 
+// TODO rework
+int polytour::ui::cdk::UpdateUserWindow::Impl::save(EObjectType objType, void * obj, void *data, chtype key) {
+    auto* userData = (UserData*)data;
 
+    auto coordinator = userData->coordinator;
+    coordinator.lock()->getMainAPI().userAPI()->updateUser(userDataToUser(*userData));
+    if (!coordinator.lock()->getMainAPI().userAPI()->isError()) {
+        bl::AuthUserSingleton::authorize(userData->nickname, userData->password);
+        const char *mesg[2];
+        mesg[0] = "<C> Success ";
+        mesg[1] = "<C>Press any key to continue.";
+        popupLabel (userData->cdk_screen, (CDK_CSTRING2) mesg, 2);
+        //activateCDKButton((CDKBUTTON*)obj, nullptr);
+        return (TRUE);
+    }
+
+    auto err = coordinator.lock()->getMainAPI().userAPI()->getError();
     const char *mesg[2];
     char msg[100];
     strcpy(msg, err->getErrorMessage().c_str());
     mesg[0] = msg;
     mesg[1] = "<C>Press any key to continue.";
     popupLabel (userData->cdk_screen, (CDK_CSTRING2) mesg, 2);
-    return (TRUE);
-}
-
-int polytour::ui::cdk::SignUpWindow::Impl::toSignIn(EObjectType objType, void *obj, void *data, chtype key) {
-    auto* userData = (UserData*)data;
-
-    auto coordinator = userData->coordinator;
-    auto err = coordinator.lock()->toSignIn();
-    if (!err)
-        return (FALSE);
-    return (TRUE);
+    return (FALSE);
 }
 
 polytour::transport::User
-polytour::ui::cdk::SignUpWindow::Impl::userDataToUser(const polytour::ui::cdk::SignUpWindow::Impl::UserData& userdata) {
+polytour::ui::cdk::UpdateUserWindow::Impl::userDataToUser(const polytour::ui::cdk::UpdateUserWindow::Impl::UserData& userdata) {
     polytour::transport::User user;
     user.nickname = userdata.nickname;
     user.password = userdata.password;
@@ -180,31 +191,40 @@ polytour::ui::cdk::SignUpWindow::Impl::userDataToUser(const polytour::ui::cdk::S
     return user;
 }
 
-void polytour::ui::cdk::SignUpWindow::Impl::init() {
+void polytour::ui::cdk::UpdateUserWindow::Impl::init() {
     cdkScreen = initCDKScreen(nullptr);
     initCDKColor ();
 
+    auto user = _pCoordinator.lock()->getMainAPI().userAPI()->currentUser();
+
     nickEntry = createEntry(CENTER, "<C> Mandatory ", "</U/6>Nickname: <!U!6>");
+    setFillField(nickEntry, user.nickname);
     setCDKEntryULChar(nickEntry, ACS_ULCORNER);
     setCDKEntryURChar(nickEntry, ACS_URCORNER);
 
     passwordEntry = createEntry(yNextTo(nickEntry), "", "</U/6>Password: <!U!6>");
+    setFillField(passwordEntry, user.password);
     passwordEntry->boxWidth = nickEntry->boxWidth;
 
     nameEntry = createEntry(yNextTo(passwordEntry), "", "</U/6>Name:     <!U!6>");
+    setFillField(nameEntry, user.name);
     nameEntry->boxWidth = passwordEntry->boxWidth;
 
     emailEntry = createEntry(yNextTo(nameEntry), "", "</U/6>Email:    <!U!6>");
+    setFillField(emailEntry, user.email);
     emailEntry->boxWidth = nameEntry->boxWidth;
 
     surnameEntry = createEntry(yNextTo(emailEntry), "<C> Not mandatory ", "</U/6>Surname:  <!U!6>");
+    if (user.surname.hasValue())
+        setFillField(surnameEntry, user.surname.getValue());
     surnameEntry->boxWidth = emailEntry->boxWidth;
 
     ageEntry = createEntry(yNextTo(surnameEntry), "", "</U/6>Age:      <!U!6>");
+    if (user.age.hasValue()) setFillField(ageEntry, std::to_string(user.age.getValue()));
     ageEntry->boxWidth = surnameEntry->boxWidth;
 
     // Init logo
-    const char* name_text[] = {"              </B> Sign up  <!B>              "};
+    const char* name_text[] = {"              </B> User info  <!B>              "};
     windowName = newCDKLabel(cdkScreen, CENTER, getbegy(nickEntry->win) - nickEntry->boxHeight / 2, (CDK_CSTRING2)name_text, 1, TRUE, FALSE);
 
     // Init logo
@@ -214,22 +234,18 @@ void polytour::ui::cdk::SignUpWindow::Impl::init() {
     // Init sing up button
     auto width = nickEntry->boxWidth;
     auto entryXPos = getbegx(nickEntry->win);
-    std::string nameSingUpButton = "<C>" + std::string(width / 4 - 4, ' ') + "Sign up" + std::string(width / 4 - 4, ' ');
-    signUpButton = newCDKButton(cdkScreen, entryXPos, yNextTo(ageEntry), nameSingUpButton.data(), nullptr, TRUE, FALSE);
-    setCDKButtonboxULChar (signUpButton, ACS_LTEE);
-    setCDKButtonboxURChar (signUpButton, ACS_TTEE);
-    setCDKButtonboxLRChar (signUpButton, ACS_LRCORNER);
+    std::string nameSingUpButton = "<C>" + std::string(width / 4 - 3, ' ') + " Save " + std::string(width / 4 - 4, ' ');
+    saveButton = newCDKButton(cdkScreen, entryXPos, yNextTo(ageEntry), nameSingUpButton.data(), nullptr, TRUE, FALSE);
+    setCDKButtonboxULChar (saveButton, ACS_LTEE);
+    setCDKButtonboxURChar (saveButton, ACS_TTEE);
+    setCDKButtonboxLRChar (saveButton, ACS_LRCORNER);
 
     // Init cancel button
-    std::string name = "<C>" + std::string(width / 4 - 4, ' ') + "Cancel" + std::string(width / 4 - 4, ' ');
-    cancelButton = newCDKButton(cdkScreen, entryXPos + width / 2, yNextTo(ageEntry), name.data(), nullptr, TRUE, FALSE);
-    setCDKButtonboxULChar (cancelButton, ACS_TTEE);
-    setCDKButtonboxURChar (cancelButton, ACS_RTEE);
-    setCDKButtonboxLLChar (cancelButton, ACS_LLCORNER);
-
-    // Init sign in button
-    std::string nameSingIn = "<C>" + std::string(width / 2 - 4, ' ') + "Sign In " + std::string(width / 2 - 4, ' ');
-    signInButton = newCDKButton(cdkScreen, CENTER, BOTTOM, nameSingIn.data(), nullptr, TRUE, FALSE);
+    std::string name = "<C>" + std::string(width / 4 - 4, ' ') + " Back " + std::string(width / 4 - 4, ' ');
+    backButton = newCDKButton(cdkScreen, entryXPos + width / 2, yNextTo(ageEntry), name.data(), nullptr, TRUE, FALSE);
+    setCDKButtonboxULChar (backButton, ACS_TTEE);
+    setCDKButtonboxURChar (backButton, ACS_RTEE);
+    setCDKButtonboxLLChar (backButton, ACS_LLCORNER);
 
 
     // Initialization of utility struct
@@ -256,30 +272,30 @@ void polytour::ui::cdk::SignUpWindow::Impl::init() {
     bindCDKObject (vENTRY, emailEntry, KEY_ENTER, activateEntry, surnameEntry);
     bindCDKObject (vENTRY, surnameEntry, KEY_TAB, activateEntry, ageEntry);
     bindCDKObject (vENTRY, surnameEntry, KEY_ENTER, activateEntry, ageEntry);
-    bindCDKObject (vENTRY, ageEntry, KEY_TAB, activateButton, signUpButton);
-    bindCDKObject (vENTRY, ageEntry, KEY_ENTER, activateButton, signUpButton);
-    bindCDKObject (vBUTTON, signUpButton, KEY_TAB, activateButton, cancelButton);
-    bindCDKObject (vBUTTON, cancelButton, KEY_TAB, activateButton, signInButton);
-    bindCDKObject (vBUTTON, signInButton, KEY_TAB, activateEntry, nickEntry);
-    bindCDKObject (vBUTTON, signInButton, KEY_ENTER, toSignIn, &_userdata);
-    bindCDKObject (vBUTTON, signUpButton, KEY_ENTER, signUp, &_userdata);
-    std::function<void()> cancelFunc = [this](){destroy();};
-    bindCDKObject (vBUTTON, cancelButton, KEY_ENTER, cancel, &cancelFunc);
+    bindCDKObject (vENTRY, ageEntry, KEY_TAB, activateButton, saveButton);
+    bindCDKObject (vENTRY, ageEntry, KEY_ENTER, activateButton, saveButton);
+    bindCDKObject (vBUTTON, saveButton, KEY_TAB, activateButton, backButton);
+    bindCDKObject (vBUTTON, backButton, KEY_TAB, activateEntry, nickEntry);
+    bindCDKObject (vBUTTON, saveButton, KEY_ENTER, save, &_userdata);
+    bindCDKObject (vBUTTON, backButton, KEY_ENTER, back, &_userdata);
 
     refreshCDKScreen (cdkScreen);
     (void)activateCDKEntry(nickEntry, nullptr);
 }
 
+void polytour::ui::cdk::UpdateUserWindow::Impl::setFillField(SEntry *entry, const std::string& field) {
+    for (const char& el: field) { injectCDKEntry(entry, el); }
+}
 
-polytour::ui::cdk::SignUpWindow::SignUpWindow(const std::shared_ptr<ICoordinator>& coordinator):
-_pImpl(std::make_unique<Impl>(coordinator)){}
-
-polytour::ui::cdk::SignUpWindow::~SignUpWindow() = default;
-
-void polytour::ui::cdk::SignUpWindow::destroy() {
+void polytour::ui::cdk::UpdateUserWindow::destroy() {
     _pImpl->destroy();
 }
 
-void polytour::ui::cdk::SignUpWindow::init() {
+void polytour::ui::cdk::UpdateUserWindow::init() {
     _pImpl->init();
 }
+
+polytour::ui::cdk::UpdateUserWindow::UpdateUserWindow(const std::shared_ptr<ICoordinator>& coordinator):
+_pImpl(std::make_unique<Impl>(coordinator)){}
+
+polytour::ui::cdk::UpdateUserWindow::~UpdateUserWindow() = default;

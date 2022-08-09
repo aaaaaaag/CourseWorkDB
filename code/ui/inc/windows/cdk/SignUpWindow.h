@@ -19,6 +19,8 @@ namespace polytour::ui::cdk {
 
         void destroy() override;
 
+        void init() override;
+
     private:
 
         class Impl;

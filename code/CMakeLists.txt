@@ -10,4 +10,4 @@ add_subdirectory(transport)
 add_subdirectory(bl)
 add_subdirectory(ui)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC db bl transport)
+target_link_libraries(${PROJECT_NAME} PUBLIC db bl transport ui_lib ui_lib_cdk)

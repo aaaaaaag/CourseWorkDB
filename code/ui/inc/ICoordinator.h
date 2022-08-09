@@ -25,6 +25,10 @@ namespace polytour::ui {
 
         virtual std::optional<bl::ErrorObj> toSignUp() = 0;
 
+        virtual std::optional<bl::ErrorObj> toMainMenu() = 0;
+
+        virtual std::optional<bl::ErrorObj> toUpdateUser() = 0;
+
     };
 }
 

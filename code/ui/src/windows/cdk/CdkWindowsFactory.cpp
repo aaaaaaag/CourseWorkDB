@@ -8,6 +8,7 @@
 #include "windows/cdk/AuthorizationWindow.h"
 #include "windows/cdk/MainMenuWindow.h"
 #include "windows/cdk/SignUpWindow.h"
+#include "windows/cdk/UpdateUserWindow.h"
 
 std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createAuthorizationWindow() {
     return std::make_unique<cdk::AuthorizationWindow>(_pCoordinator.lock());
@@ -22,7 +23,7 @@ std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createTo
 }
 
 std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createUserInfoWindow() {
-    return nullptr;
+    return std::make_unique<cdk::UpdateUserWindow>(_pCoordinator.lock());
 }
 
 std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createSignUpWindow() {
