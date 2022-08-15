@@ -20,7 +20,7 @@ namespace polytour::bl::facade {
 
       virtual std::shared_ptr<ITournamentFacade> tournamentAPI() = 0;
 
-      virtual std::shared_ptr<IMatchFacade> matchFacade() = 0;
+      virtual std::shared_ptr<IMatchFacade> matchAPI() = 0;
 
     };
 }

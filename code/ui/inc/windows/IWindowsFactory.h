@@ -7,6 +7,7 @@
 
 #include "IWindow.h"
 #include <memory>
+#include "Tournament.h"
 
 namespace polytour::ui {
     class IWindowsFactory {
@@ -18,11 +19,13 @@ namespace polytour::ui {
 
         virtual std::unique_ptr<IWindow> createMainMenuWindow() = 0;
 
-        virtual std::unique_ptr<IWindow> createTournamentWindow() = 0;
+        virtual std::unique_ptr<IWindow> createTournamentWindow(const transport::Tournament& tournament) = 0;
 
         virtual std::unique_ptr<IWindow> createUserInfoWindow() = 0;
 
         virtual std::unique_ptr<IWindow> createSignUpWindow() = 0;
+
+        virtual std::unique_ptr<IWindow> createTournamentCreationWindow() = 0;
     };
 }
 

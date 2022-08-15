@@ -66,3 +66,17 @@ std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::toUpdateUser
     _pCurrentWindow->init();
     return std::nullopt;
 }
+
+std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::toTournamentCreation() {
+    _pCurrentWindow->destroy();
+    _pCurrentWindow = _pWindowsFactory->createTournamentCreationWindow();
+    _pCurrentWindow->init();
+    return std::nullopt;
+}
+
+std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::toTournament(const transport::Tournament& tournament) {
+    _pCurrentWindow->destroy();
+    _pCurrentWindow = _pWindowsFactory->createTournamentWindow(tournament);
+    _pCurrentWindow->init();
+    return std::nullopt;
+}

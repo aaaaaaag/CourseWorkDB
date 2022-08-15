@@ -16,12 +16,14 @@
 #define NEXT_MATCH_ID_KEY "next_match_id"
 #define PREV_MATCH_1_ID "prev_match_1_id"
 #define PREV_MATCH_2_ID "prev_match_2_id"
+#define TOUR_KEY "tour"
 
 polytour::db::utility::FieldSet
 polytour::db::repository::MatchRepository::toFieldSet(const polytour::transport::Match &obj) {
     utility::FieldSet result;
     result.addPair(ID_KEY, utility::TableAbstractValue(obj.id));
     result.addPair(TOURNAMENT_ID_KEY, utility::TableAbstractValue(obj.tournament_id));
+    result.addPair(TOUR_KEY, utility::TableAbstractValue(obj.tour));
     result.addPair(STATUS_KEY, utility::TableAbstractValue(obj.status));
     if (obj.participant_1_id.hasValue())
         result.addPair(PARTICIPANT_1_ID_KEY, utility::TableAbstractValue(obj.participant_1_id.getValue()));
@@ -70,6 +72,8 @@ polytour::db::repository::MatchRepository::toFieldSet(const polytour::transport:
         result.addPair(ID_KEY, utility::TableAbstractValue(obj.id_.value()));
     if (obj.tournament_id_.has_value())
         result.addPair(TOURNAMENT_ID_KEY, utility::TableAbstractValue(obj.tournament_id_.value()));
+    if (obj.tour_.has_value())
+        result.addPair(TOUR_KEY, utility::TableAbstractValue(obj.tour_.value()));
     if (obj.status_.has_value())
         result.addPair(STATUS_KEY, utility::TableAbstractValue(obj.status_.value()));
     if (obj.participant_1_id_.has_value()) {
@@ -130,6 +134,8 @@ polytour::db::repository::MatchRepository::fromFieldSet(const polytour::db::util
         result.tournament_id = field[TOURNAMENT_ID_KEY].toInt();
     if (field.has_value_under_key(STATUS_KEY))
         result.status = field[STATUS_KEY].toString();
+    if (field.has_value_under_key(TOUR_KEY))
+        result.tour = field[TOUR_KEY].toInt();
     if (field.has_value_under_key(PARTICIPANT_1_ID_KEY)) {
         auto foundValue = field[PARTICIPANT_1_ID_KEY];
         if (foundValue.isNull()) result.participant_1_id = decltype(result.participant_1_id){foundValue.toNull()};
@@ -225,9 +231,14 @@ polytour::db::repository::Identity polytour::db::repository::MatchRepository::ge
     result.tableColumns.emplace(PREV_MATCH_1_ID, Identity::column_description_t{
             .type = utility::TableTypes::Int,
             .mandatory = utility::FieldMandatory::MayBeNull
-    });result.tableColumns.emplace(PREV_MATCH_2_ID, Identity::column_description_t{
+    });
+    result.tableColumns.emplace(PREV_MATCH_2_ID, Identity::column_description_t{
             .type = utility::TableTypes::Int,
             .mandatory = utility::FieldMandatory::MayBeNull
+    });
+    result.tableColumns.emplace(TOUR_KEY, Identity::column_description_t{
+            .type = utility::TableTypes::Int,
+            .mandatory = utility::FieldMandatory::NotNull
     });
 
     return result;

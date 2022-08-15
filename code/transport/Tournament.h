@@ -18,9 +18,9 @@ namespace polytour::transport {
         std::string name;
         utility::NotMandatoryField<std::string> description;
         std::string status;
-        int organizer_id;
-        int max_participants_num;
-        int cur_participants_num;
+        int organizer_id = -1;
+        int max_participants_num = -1;
+        int cur_participants_num = -1;
         int getOID() override { return id; }
 
         static std::string status_wait_for_participants() { return "wait"; };

@@ -40,6 +40,7 @@ public:
     typedef struct UserData {
         SScreen* cdk_screen;
         std::weak_ptr<polytour::ui::ICoordinator> coordinator;
+        Impl* _impl;
     } UserData;
 
     static int deactivateObj(EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED);
@@ -67,8 +68,10 @@ private:
     static BINDFN_PROTO (activateLogOut);
     static BINDFN_PROTO (activateQuit);
     static BINDFN_PROTO (activateUpdateUser);
+    static BINDFN_PROTO (activateCreateTournament);
     static BINDFN_PROTO (goToNextButton);
     static BINDFN_PROTO (goToNextScroll);
+    static BINDFN_PROTO (goToTournament);
 };
 
 polytour::ui::MainMenuWindow::Impl::Impl(const std::shared_ptr<ICoordinator> &coordinator):
@@ -93,7 +96,8 @@ void polytour::ui::MainMenuWindow::Impl::init() {
 
     _userdata = {
             .cdk_screen = cdkScreen,
-            .coordinator = _pCoordinator
+            .coordinator = _pCoordinator,
+            ._impl = this
     };
 
     bindCDKObject (vSCROLL, tourSelection, KEY_TAB, goToNextButton, _editProfileButton);
@@ -105,6 +109,8 @@ void polytour::ui::MainMenuWindow::Impl::init() {
     bindCDKObject (vBUTTON, _logOutButton, KEY_ENTER, activateLogOut, &_userdata);
     bindCDKObject (vBUTTON, _quitButton, KEY_ENTER, activateQuit, nullptr);
     bindCDKObject (vBUTTON, _editProfileButton, KEY_ENTER, activateUpdateUser, &_userdata);
+    bindCDKObject(vBUTTON, _createTournamentButton, KEY_ENTER, activateCreateTournament, &_userdata);
+    bindCDKObject(vSCROLL, tourSelection, KEY_ENTER, goToTournament, &_userdata);
 
     refreshCDKScreen(cdkScreen);
     activateCDKScroll(tourSelection, nullptr);
@@ -172,9 +178,20 @@ void polytour::ui::MainMenuWindow::Impl::destroy() {
     if (_isDestroyed)
         return;
 
+//    unbindCDKObject(vSCROLL, tourSelection, KEY_ENTER);
+//    unbindCDKObject(vSCROLL, tourSelection, KEY_TAB);
+//    unbindCDKObject(vBUTTON, _editProfileButton, KEY_ENTER);
+//    unbindCDKObject(vBUTTON, _editProfileButton, KEY_TAB);
+//    unbindCDKObject(vBUTTON, _createTournamentButton, KEY_ENTER);
+//    unbindCDKObject(vBUTTON, _createTournamentButton, KEY_TAB);
+//    unbindCDKObject(vBUTTON, _logOutButton, KEY_ENTER);
+//    unbindCDKObject(vBUTTON, _logOutButton, KEY_TAB);
+//    unbindCDKObject(vBUTTON, _quitButton, KEY_ENTER);
+//    unbindCDKObject(vBUTTON, _quitButton, KEY_TAB);
+
     deactivateObj(vBUTTON, _editProfileButton);
 
-    destroyCDKScroll(tourSelection);
+    //destroyCDKScroll(tourSelection);
     destroyCDKButton(_editProfileButton);
     _editProfileButton = nullptr;
     destroyCDKButton(_createTournamentButton);
@@ -235,6 +252,29 @@ int polytour::ui::MainMenuWindow::Impl::activateUpdateUser(EObjectType objType, 
 
     auto coordinator = userData->coordinator;
     auto err = coordinator.lock()->toUpdateUser();
+    if (!err)
+        return (FALSE);
+    return (TRUE);
+}
+
+int polytour::ui::MainMenuWindow::Impl::activateCreateTournament(EObjectType objType, void * obj, void * data, chtype key) {
+    auto* userData = (UserData*)data;
+
+    auto coordinator = userData->coordinator;
+    auto err = coordinator.lock()->toTournamentCreation();
+    if (!err)
+        return (FALSE);
+    return (TRUE);
+}
+
+int polytour::ui::MainMenuWindow::Impl::goToTournament(EObjectType objType, void * obj, void * data, chtype key) {
+    auto* userData = (UserData*)data;
+
+    auto selectedTournamentId = getCDKScrollCurrentItem(userData->_impl->tourSelection);
+    auto selectedTournament = userData->_impl->_vActiveTournaments[selectedTournamentId];
+
+    auto coordinator = userData->coordinator;
+    auto err = coordinator.lock()->toTournament(selectedTournament);
     if (!err)
         return (FALSE);
     return (TRUE);

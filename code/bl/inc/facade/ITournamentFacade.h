@@ -20,6 +20,9 @@ namespace polytour::bl::facade {
         virtual void remove(const transport::Tournament& tournament) = 0;
 
         virtual std::vector<transport::Tournament> getTournaments(const transport::Tournament::search_t& search) = 0;
+
+        virtual std::vector<transport::User> getTournamentParticipants(const transport::Tournament& tournament) = 0;
+
     };
 }
 

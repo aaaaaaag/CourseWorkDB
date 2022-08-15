@@ -17,7 +17,7 @@ namespace polytour::bl::facade {
 
         std::shared_ptr<ITournamentFacade> tournamentAPI() override;
 
-        std::shared_ptr<IMatchFacade> matchFacade() override;
+        std::shared_ptr<IMatchFacade> matchAPI() override;
 
     private:
 

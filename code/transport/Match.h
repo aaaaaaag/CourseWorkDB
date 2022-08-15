@@ -25,6 +25,7 @@ namespace polytour::transport {
         utility::NotMandatoryField<int> next_match_id;
         utility::NotMandatoryField<int> prev_match_1_id;
         utility::NotMandatoryField<int> prev_match_2_id;
+        int tour;
 
         static std::string status_wait_participants(){ return "wait_participants"; }
         static std::string status_wait_tribes() { return "wait_tribes"; }
@@ -46,6 +47,7 @@ namespace polytour::transport {
             std::optional<decltype(next_match_id)> next_match_id_;
             std::optional<decltype(prev_match_1_id)> prev_match_1_id_;
             std::optional<decltype(prev_match_2_id)> prev_match_2_id_;
+            std::optional<decltype(tour)> tour_;
         };
 
         using search_t = SearchMatch;

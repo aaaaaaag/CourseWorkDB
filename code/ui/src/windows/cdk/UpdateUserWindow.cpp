@@ -86,12 +86,12 @@ void polytour::ui::cdk::UpdateUserWindow::Impl::destroy() {
     if (isDestroyed)
         return;
 
-    injectCDKButton(backButton, KEY_ESC);
-    backButton = nullptr;
-    injectCDKButton(saveButton, KEY_ESC);
-    saveButton = nullptr;
-    //deactivateObj(vENTRY, nickEntry);
-    injectCDKEntry(nickEntry, KEY_ESC);
+//    injectCDKButton(backButton, KEY_ESC);
+//    backButton = nullptr;
+//    injectCDKButton(saveButton, KEY_ESC);
+//    saveButton = nullptr;
+//    //deactivateObj(vENTRY, nickEntry);
+//    injectCDKEntry(nickEntry, KEY_ESC);
 
 
     destroyCDKButton(backButton);
@@ -103,7 +103,7 @@ void polytour::ui::cdk::UpdateUserWindow::Impl::destroy() {
     destroyCDKEntry(nameEntry);
     destroyCDKEntry(passwordEntry);
     destroyCDKEntry(nickEntry);
-    nickEntry = nullptr;
+//    nickEntry = nullptr;
 
     destroyCDKLabel(logo);
     destroyCDKLabel(windowName);
@@ -144,7 +144,7 @@ int polytour::ui::cdk::UpdateUserWindow::Impl::back(EObjectType objType, void * 
     auto* userData = (UserData*)data;
 
     auto coordinator = userData->coordinator;
-    deactivateObj(objType, obj);
+    //deactivateObj(objType, obj);
     auto err = coordinator.lock()->toMainMenu();
     if (!err)
         return (FALSE);

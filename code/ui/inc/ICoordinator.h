@@ -29,6 +29,10 @@ namespace polytour::ui {
 
         virtual std::optional<bl::ErrorObj> toUpdateUser() = 0;
 
+        virtual std::optional<bl::ErrorObj> toTournamentCreation() = 0;
+
+        virtual std::optional<bl::ErrorObj> toTournament(const transport::Tournament& tournament) = 0;
+
     };
 }
 

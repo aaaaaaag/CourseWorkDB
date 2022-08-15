@@ -197,8 +197,7 @@ int polytour::ui::cdk::AuthorizationWindow::Impl::authorize (
     auto coordinator = userData->coordinator;
     auto err = coordinator.lock()->authorize(userData->nickname, userData->password);
     if (!err)
-        return (FALSE);
-
+        return (TRUE);
 
     const char *mesg[2];
     mesg[0] = "<C> Failed authorization ";

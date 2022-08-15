@@ -18,11 +18,13 @@ namespace polytour::ui {
 
         std::unique_ptr<IWindow> createMainMenuWindow() override;
 
-        std::unique_ptr<IWindow> createTournamentWindow() override;
+        std::unique_ptr<IWindow> createTournamentWindow(const transport::Tournament& tournament) override;
 
         std::unique_ptr<IWindow> createUserInfoWindow() override;
 
         std::unique_ptr<IWindow> createSignUpWindow() override;
+
+        std::unique_ptr<IWindow> createTournamentCreationWindow() override;
 
     private:
 

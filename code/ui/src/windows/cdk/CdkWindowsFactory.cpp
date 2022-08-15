@@ -9,6 +9,8 @@
 #include "windows/cdk/MainMenuWindow.h"
 #include "windows/cdk/SignUpWindow.h"
 #include "windows/cdk/UpdateUserWindow.h"
+#include "windows/cdk/TournamentCreationWindow.h"
+#include "windows/cdk/GuestTournamentWindow.h"
 
 std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createAuthorizationWindow() {
     return std::make_unique<cdk::AuthorizationWindow>(_pCoordinator.lock());
@@ -18,8 +20,9 @@ std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createMa
     return std::make_unique<MainMenuWindow>(_pCoordinator.lock());
 }
 
-std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createTournamentWindow() {
-    return nullptr;
+std::unique_ptr<polytour::ui::IWindow>
+polytour::ui::CdkWindowsFactory::createTournamentWindow(const transport::Tournament& tournament) {
+    return std::make_unique<cdk::GuestTournamentWindow>(_pCoordinator.lock(), tournament);
 }
 
 std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createUserInfoWindow() {
@@ -28,6 +31,10 @@ std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createUs
 
 std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createSignUpWindow() {
     return std::make_unique<cdk::SignUpWindow>(_pCoordinator.lock());
+}
+
+std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createTournamentCreationWindow() {
+    return std::make_unique<cdk::TournamentCreationWindow>(_pCoordinator.lock());
 }
 
 polytour::ui::CdkWindowsFactory::CdkWindowsFactory(const std::shared_ptr<ICoordinator>& coordinator):

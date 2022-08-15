@@ -25,6 +25,8 @@ namespace polytour::bl::transaction {
 
         std::vector<transport::Tournament> search(const transport::Tournament::search_t &search) override;
 
+        std::vector<transport::User> getParticipants(const transport::Tournament &tournament) override;
+
     private:
 
         std::shared_ptr<db::repository::roles::IRole> _pRole;

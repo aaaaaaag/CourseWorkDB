@@ -15,7 +15,7 @@ std::shared_ptr<polytour::bl::facade::ITournamentFacade> polytour::bl::facade::M
     return _pTournamentFacade;
 }
 
-std::shared_ptr<polytour::bl::facade::IMatchFacade> polytour::bl::facade::MainFacade::matchFacade() {
+std::shared_ptr<polytour::bl::facade::IMatchFacade> polytour::bl::facade::MainFacade::matchAPI() {
     return _pMatchFacade;
 }
 

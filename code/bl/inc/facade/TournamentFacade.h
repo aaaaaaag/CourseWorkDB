@@ -21,6 +21,8 @@ namespace polytour::bl::facade {
 
         std::vector<transport::Tournament> getTournaments(const transport::Tournament::search_t &search) override;
 
+        std::vector<transport::User> getTournamentParticipants(const transport::Tournament &tournament) override;
+
     private:
 
         std::unique_ptr<transaction::ITournamentTransactionFactory> _pTransactionFactory;

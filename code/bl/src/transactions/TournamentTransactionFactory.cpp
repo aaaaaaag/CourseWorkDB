@@ -112,6 +112,19 @@ std::vector<polytour::transport::Tournament> polytour::bl::transaction::Tourname
     return repoFactory.getTournamentRepository()->findObj(search);
 }
 
+std::vector<polytour::transport::User> polytour::bl::transaction::TournamentTransactionFactory::getParticipants(
+        const polytour::transport::Tournament &tournament) {
+    db::repository::RepositoryFactory repoFactory(_pRole);
+    auto participants = repoFactory.getTournamentParticipantsRepository()->findObj(
+            {.tournament_id_ = tournament.id});
+
+    std::vector<polytour::transport::User> result;
+    for (const auto& participant: participants) {
+        result.emplace_back(repoFactory.getUserRepository()->findObj({.id_ = participant.participant_id})[0]);
+    }
+    return result;
+}
+
 polytour::bl::transaction::TournamentTransactionFactory::TournamentTransactionFactory(
         std::shared_ptr<db::repository::roles::IRole> role):
         _pRole(std::move(role)),

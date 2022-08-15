@@ -30,6 +30,10 @@ namespace polytour::ui {
 
         std::optional<bl::ErrorObj> toUpdateUser() override;
 
+        std::optional<bl::ErrorObj> toTournamentCreation() override;
+
+        std::optional<bl::ErrorObj> toTournament(const transport::Tournament& tournament) override;
+
     private:
 
         std::unique_ptr<IWindow> _pCurrentWindow;
