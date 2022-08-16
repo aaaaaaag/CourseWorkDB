@@ -55,6 +55,7 @@ public:
     void rebindMatches();
     void refresh();
     void removeMatchView();
+    void popupParticipantLabel(const std::optional<transport::User>& user);
 
 private:
     UserData _userdata;
@@ -77,7 +78,8 @@ private:
 
     std::vector<transport::User> _vParticipants;
     std::vector<transport::Match> _vTourMatches;
-
+    std::optional<transport::User> _participant1;
+    std::optional<transport::User> _participant2;
 
     static BINDFN_PROTO (toTourSelection);
     static BINDFN_PROTO (toMatchSelection);
@@ -89,6 +91,11 @@ private:
     static BINDFN_PROTO (decreaseTour);
     static BINDFN_PROTO (chooseMatch);
     static BINDFN_PROTO (toMainMenu);
+
+    static BINDFN_PROTO (toParticipant1Button);
+    static BINDFN_PROTO (toParticipant2Button);
+    static BINDFN_PROTO (activateParticipant1Button);
+    static BINDFN_PROTO (activateParticipant2Button);
 };
 
 polytour::ui::cdk::GuestTournamentWindow::Impl::Impl(const std::shared_ptr<ICoordinator> &coordinator,
@@ -351,12 +358,16 @@ void polytour::ui::cdk::GuestTournamentWindow::Impl::createMatchView() {
     auto selectedMatch = _vTourMatches[getCDKScrollCurrentItem(_tourMatchesList)];
 
     transport::User participant1, participant2;
-    if (selectedMatch.participant_1_id.hasValue())
+    if (selectedMatch.participant_1_id.hasValue()) {
         participant1 = _pCoordinator.lock()->getMainAPI().userAPI()->getUsers(
                 {.id_ = selectedMatch.participant_1_id.getValue()})[0];
-    if (selectedMatch.participant_2_id.hasValue())
+        _participant1 = participant1;
+    }
+    if (selectedMatch.participant_2_id.hasValue()) {
         participant2 = _pCoordinator.lock()->getMainAPI().userAPI()->getUsers(
                 {.id_ = selectedMatch.participant_2_id.getValue()})[0];
+        _participant2 = participant2;
+    }
 
     auto name = string_format("%10s vs %-10s", participant1.nickname.c_str(), participant2.nickname.c_str());
 
@@ -472,12 +483,22 @@ void polytour::ui::cdk::GuestTournamentWindow::Impl::createMatchView() {
     _matchView._loserLabel = loserLabel;
     _matchView._isDestroyed = false;
 
+    unbindCDKObject(vSCROLL, _userdata._tourMatchesList, KEY_TAB);
+    bindCDKObject(vSCROLL, _userdata._tourMatchesList, KEY_TAB, toParticipant1Button, &_userdata);
+    bindCDKObject(vBUTTON, _matchView._participant1ProfileButton, KEY_TAB, toParticipant2Button, &_userdata);
+    bindCDKObject(vBUTTON, _matchView._participant2ProfileButton, KEY_TAB, toJoinButton, &_userdata);
+    bindCDKObject(vBUTTON, _matchView._participant1ProfileButton, KEY_ENTER, activateParticipant1Button, &_userdata);
+    bindCDKObject(vBUTTON, _matchView._participant2ProfileButton, KEY_ENTER, activateParticipant2Button, &_userdata);
     refresh();
 }
 
 void polytour::ui::cdk::GuestTournamentWindow::Impl::removeMatchView() {
     if (_matchView._isDestroyed)
         return;
+    unbindCDKObject(vSCROLL, _userdata._tourMatchesList, KEY_TAB);
+    bindCDKObject(vSCROLL, _userdata._tourMatchesList, KEY_TAB, toJoinButton, &_userdata);
+    _participant1 = std::nullopt;
+    _participant2 = std::nullopt;
     destroyCDKLabel(_matchView._matchViewLabel);
     destroyCDKLabel(_matchView._matchName);
     destroyCDKLabel(_matchView._matchStatus);
@@ -540,7 +561,9 @@ int polytour::ui::cdk::GuestTournamentWindow::Impl::toJoinButton(EObjectType obj
     userdata->_impl->_callback = [obj = userdata->_impl->_takePartButton](){
         activateCDKButton(obj, nullptr);
     };
-    injectCDKScroll((CDKSCROLL*) obj, KEY_ESC);
+    deactivateObj(objType, obj);
+    if (objType == vBUTTON)
+        return TRUE;
     return FALSE;
 }
 
@@ -560,6 +583,73 @@ int polytour::ui::cdk::GuestTournamentWindow::Impl::toMatchParticipants(EObjectT
     };
     injectCDKButton((CDKBUTTON *) obj, KEY_ESC);
     return TRUE;
+}
+
+int polytour::ui::cdk::GuestTournamentWindow::Impl::toParticipant1Button(EObjectType objType, void * obj, void * data, chtype key) {
+    auto userdata = (UserData*) data;
+    userdata->_impl->_callback = [obj = userdata->_impl->_matchView._participant1ProfileButton](){
+        activateCDKButton(obj, nullptr);
+    };
+    deactivateObj(objType, obj);
+    return TRUE;
+}
+
+int polytour::ui::cdk::GuestTournamentWindow::Impl::toParticipant2Button(EObjectType objType, void * obj, void * data, chtype key) {
+    auto userdata = (UserData*) data;
+    userdata->_impl->_callback = [obj = userdata->_impl->_matchView._participant2ProfileButton](){
+        activateCDKButton(obj, nullptr);
+    };
+    deactivateObj(objType, obj);
+    return TRUE;
+}
+
+int polytour::ui::cdk::GuestTournamentWindow::Impl::activateParticipant1Button(EObjectType objType, void * obj, void * data, chtype key) {
+    auto userdata = (UserData*) data;
+    userdata->_impl->popupParticipantLabel(userdata->_impl->_participant1);
+    return FALSE;
+}
+
+int polytour::ui::cdk::GuestTournamentWindow::Impl::activateParticipant2Button(EObjectType objType, void * obj, void * data, chtype key) {
+    auto userdata = (UserData*) data;
+    userdata->_impl->popupParticipantLabel(userdata->_impl->_participant2);
+    return FALSE;
+}
+
+
+void polytour::ui::cdk::GuestTournamentWindow::Impl::popupParticipantLabel(const std::optional<transport::User>& user) {
+    if (user.has_value()) {
+        auto participant = user.value();
+        int resultStringsCount = 3;
+        const char *mesg[6];
+        const char * formatStr = "%-50s";
+        mesg[0] = convert(string_format(formatStr, "User profile"));
+        std::string nickname = "Nickname: " + participant.nickname;
+        mesg[1] = convert(string_format(formatStr, convert(nickname)));
+        std::string name = "Name: " + participant.name;
+        mesg[2] = convert(string_format(formatStr, convert(name)));
+        std::string email = "Email: " + participant.email;
+        mesg[3] = convert(string_format(formatStr, convert(email)));
+        if (participant.surname.hasValue()) {
+            resultStringsCount++;
+            std::string surname = "Surname: " + participant.surname.getValue();
+            mesg[resultStringsCount] = convert(string_format(
+                    formatStr, convert(surname)));
+        }
+        if (participant.age.hasValue()) {
+            resultStringsCount++;
+            std::string age = "Age: " + std::to_string(participant.age.getValue());
+            mesg[resultStringsCount] = convert(string_format(
+                    formatStr, convert(age)));
+        }
+        resultStringsCount++;
+        mesg[resultStringsCount] = "<C>Press any key to continue.";
+        popupLabel(_cdkScreen, (CDK_CSTRING2) mesg, resultStringsCount);
+    } else {
+        const char *mesg[2];
+        mesg[0] = "<C>Empty participant field";
+        mesg[1] = "<C>Press any key to continue.";
+        popupLabel(_cdkScreen, (CDK_CSTRING2) mesg, 2);
+    }
 }
 
 template<typename... Args>
