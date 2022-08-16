@@ -25,6 +25,7 @@ public:
         char* email;
         char* surname;
         char* age;
+        Impl* _impl;
     } UserData;
 
 private:
@@ -55,6 +56,7 @@ private:
     bool isDestroyed = false;
 
     UserData _userdata;
+    std::function<void()> _callback;
 
     static BINDFN_PROTO (activateEntry);
     static BINDFN_PROTO (activateButton);
@@ -86,14 +88,6 @@ void polytour::ui::cdk::UpdateUserWindow::Impl::destroy() {
     if (isDestroyed)
         return;
 
-//    injectCDKButton(backButton, KEY_ESC);
-//    backButton = nullptr;
-//    injectCDKButton(saveButton, KEY_ESC);
-//    saveButton = nullptr;
-//    //deactivateObj(vENTRY, nickEntry);
-//    injectCDKEntry(nickEntry, KEY_ESC);
-
-
     destroyCDKButton(backButton);
     destroyCDKButton(saveButton);
 
@@ -103,7 +97,6 @@ void polytour::ui::cdk::UpdateUserWindow::Impl::destroy() {
     destroyCDKEntry(nameEntry);
     destroyCDKEntry(passwordEntry);
     destroyCDKEntry(nickEntry);
-//    nickEntry = nullptr;
 
     destroyCDKLabel(logo);
     destroyCDKLabel(windowName);
@@ -142,12 +135,11 @@ int polytour::ui::cdk::UpdateUserWindow::Impl::deactivateObj(EObjectType cdktype
 
 int polytour::ui::cdk::UpdateUserWindow::Impl::back(EObjectType objType, void * obj, void *data, chtype key) {
     auto* userData = (UserData*)data;
-
     auto coordinator = userData->coordinator;
-    //deactivateObj(objType, obj);
-    auto err = coordinator.lock()->toMainMenu();
-    if (!err)
-        return (FALSE);
+    userData->_impl->_callback = [coordinator](){
+        coordinator.lock()->toMainMenu();
+    };
+    if (!deactivateObj(objType, obj)) return (FALSE);
     return (TRUE);
 }
 
@@ -259,6 +251,7 @@ void polytour::ui::cdk::UpdateUserWindow::Impl::init() {
             .surname = surnameEntry->info,
             .age = ageEntry->info
     };
+    _userdata._impl = this;
 
     // Bind section
 
@@ -281,6 +274,9 @@ void polytour::ui::cdk::UpdateUserWindow::Impl::init() {
 
     refreshCDKScreen (cdkScreen);
     (void)activateCDKEntry(nickEntry, nullptr);
+
+    destroy();
+    _callback();
 }
 
 void polytour::ui::cdk::UpdateUserWindow::Impl::setFillField(SEntry *entry, const std::string& field) {

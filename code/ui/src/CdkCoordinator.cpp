@@ -10,9 +10,7 @@
 std::optional<polytour::bl::ErrorObj>
 polytour::ui::CdkCoordinator::authorize(const std::string &nick, const std::string &pass) {
     _pMainFacade->userAPI()->auth(nick, pass);
-    auto error = _pMainFacade->userAPI()->getError();
-    if (error) return error;
-    return toMainMenu();
+    return _pMainFacade->userAPI()->getError();
 }
 
 polytour::bl::facade::IMainFacade &polytour::ui::CdkCoordinator::getMainAPI() {
@@ -34,7 +32,7 @@ std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::signUp(polyt
     _pMainFacade->userAPI()->regNewUser(user);
     if (_pMainFacade->userAPI()->isError())
         return _pMainFacade->userAPI()->getError();
-    toSignIn();
+    return std::nullopt;
 }
 
 std::optional<polytour::bl::ErrorObj> polytour::ui::CdkCoordinator::toSignIn() {

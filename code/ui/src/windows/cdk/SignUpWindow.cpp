@@ -24,6 +24,7 @@ public:
         char* email;
         char* surname;
         char* age;
+        Impl* _impl;
     } UserData;
 
 private:
@@ -35,6 +36,7 @@ private:
     static polytour::transport::User userDataToUser(const UserData& userdata);
 
     std::weak_ptr<ICoordinator> _pCoordinator;
+    std::function<void()> _callback;
 
     SScreen* cdkScreen;
     SEntry* nickEntry;
@@ -131,10 +133,9 @@ int polytour::ui::cdk::SignUpWindow::Impl::deactivateObj(EObjectType cdktype, vo
 }
 
 int polytour::ui::cdk::SignUpWindow::Impl::cancel(EObjectType objType, void * obj, void *data, chtype key) {
-    chtype esc = KEY_ESC;
-    (void) activateCDKButton((CDKBUTTON*)obj, &esc);
-    auto cancelFunc = (std::function<void()>*)data;
-    (*cancelFunc)();
+    auto* userData = (UserData*)data;
+    if (!deactivateObj(objType, obj)) return (FALSE);
+    userData->_impl->_callback = [](){};
     return (TRUE);
 }
 
@@ -143,8 +144,12 @@ int polytour::ui::cdk::SignUpWindow::Impl::signUp(EObjectType objType, void * ob
 
     auto coordinator = userData->coordinator;
     auto err = coordinator.lock()->signUp(userDataToUser(*userData));
-    if (!err)
+    if (!err) {
+        userData->_impl->_callback = [coordinator]() {
+            coordinator.lock()->toSignIn();
+        };
         return (FALSE);
+    }
 
 
     const char *mesg[2];
@@ -153,6 +158,7 @@ int polytour::ui::cdk::SignUpWindow::Impl::signUp(EObjectType objType, void * ob
     mesg[0] = msg;
     mesg[1] = "<C>Press any key to continue.";
     popupLabel (userData->cdk_screen, (CDK_CSTRING2) mesg, 2);
+    activateCDKButton((CDKBUTTON*) obj, nullptr);
     return (TRUE);
 }
 
@@ -160,9 +166,10 @@ int polytour::ui::cdk::SignUpWindow::Impl::toSignIn(EObjectType objType, void *o
     auto* userData = (UserData*)data;
 
     auto coordinator = userData->coordinator;
-    auto err = coordinator.lock()->toSignIn();
-    if (!err)
-        return (FALSE);
+    userData->_impl->_callback = [coordinator](){
+        coordinator.lock()->toSignIn();
+    };
+    if (!deactivateObj(objType, obj)) return (FALSE);
     return (TRUE);
 }
 
@@ -243,6 +250,7 @@ void polytour::ui::cdk::SignUpWindow::Impl::init() {
             .surname = surnameEntry->info,
             .age = ageEntry->info
     };
+    _userdata._impl = this;
 
     // Bind section
 
@@ -263,11 +271,13 @@ void polytour::ui::cdk::SignUpWindow::Impl::init() {
     bindCDKObject (vBUTTON, signInButton, KEY_TAB, activateEntry, nickEntry);
     bindCDKObject (vBUTTON, signInButton, KEY_ENTER, toSignIn, &_userdata);
     bindCDKObject (vBUTTON, signUpButton, KEY_ENTER, signUp, &_userdata);
-    std::function<void()> cancelFunc = [this](){destroy();};
-    bindCDKObject (vBUTTON, cancelButton, KEY_ENTER, cancel, &cancelFunc);
+    bindCDKObject (vBUTTON, cancelButton, KEY_ENTER, cancel, &_userdata);
 
     refreshCDKScreen (cdkScreen);
     (void)activateCDKEntry(nickEntry, nullptr);
+
+    destroy();
+    _callback();
 }
 
 

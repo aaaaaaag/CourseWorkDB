@@ -62,6 +62,7 @@ private:
     SButton* _createTournamentButton;
     SButton* _editProfileButton;
 
+    std::function<void()> _callback;
     UserData _userdata;
 
     static BINDFN_PROTO (activateScroll);
@@ -107,13 +108,15 @@ void polytour::ui::MainMenuWindow::Impl::init() {
     bindCDKObject (vBUTTON, _quitButton, KEY_TAB, goToNextScroll, tourSelection);
 
     bindCDKObject (vBUTTON, _logOutButton, KEY_ENTER, activateLogOut, &_userdata);
-    bindCDKObject (vBUTTON, _quitButton, KEY_ENTER, activateQuit, nullptr);
+    bindCDKObject (vBUTTON, _quitButton, KEY_ENTER, activateQuit, &_userdata);
     bindCDKObject (vBUTTON, _editProfileButton, KEY_ENTER, activateUpdateUser, &_userdata);
     bindCDKObject(vBUTTON, _createTournamentButton, KEY_ENTER, activateCreateTournament, &_userdata);
     bindCDKObject(vSCROLL, tourSelection, KEY_ENTER, goToTournament, &_userdata);
 
     refreshCDKScreen(cdkScreen);
     activateCDKScroll(tourSelection, nullptr);
+    destroy();
+    _callback();
 }
 
 void polytour::ui::MainMenuWindow::Impl::initTournamentList() {
@@ -139,7 +142,7 @@ void polytour::ui::MainMenuWindow::Impl::initTournamentList() {
             &selectionElems[0], selectionElems.size(), TRUE,
             A_REVERSE, TRUE, FALSE
             );
-    bindCDKObject(vSCROLL, tourSelection, KEY_ENTER, activateScroll, &_vActiveTournaments);
+    //bindCDKObject(vSCROLL, tourSelection, KEY_ENTER, activateScroll, &_vActiveTournaments);
 }
 
 
@@ -189,7 +192,7 @@ void polytour::ui::MainMenuWindow::Impl::destroy() {
 //    unbindCDKObject(vBUTTON, _quitButton, KEY_ENTER);
 //    unbindCDKObject(vBUTTON, _quitButton, KEY_TAB);
 
-    deactivateObj(vBUTTON, _editProfileButton);
+    //deactivateObj(vBUTTON, _editProfileButton);
 
     //destroyCDKScroll(tourSelection);
     destroyCDKButton(_editProfileButton);
@@ -206,32 +209,32 @@ void polytour::ui::MainMenuWindow::Impl::destroy() {
 
 int polytour::ui::MainMenuWindow::Impl::activateLogOut(EObjectType objType, void * obj, void * data, chtype key) {
     auto* userData = (UserData*)data;
-
     auto coordinator = userData->coordinator;
-    auto err = coordinator.lock()->toSignIn();
-    if (!err)
-        return (FALSE);
+    userData->_impl->_callback = [coordinator](){
+        coordinator.lock()->toSignIn();
+    };
+    if (!deactivateObj(objType, obj)) return (FALSE);
     return (TRUE);
 }
 
-int polytour::ui::MainMenuWindow::Impl::activateQuit(EObjectType, void *obj, void *, chtype) {
-    injectCDKButton((CDKBUTTON*) obj, KEY_ESC);
-    return (FALSE);
+int polytour::ui::MainMenuWindow::Impl::activateQuit(EObjectType objectType, void *obj, void * data, chtype) {
+    auto* userData = (UserData*)data;
+    userData->_impl->_callback = [](){};
+    if (!deactivateObj(objectType, obj)) return (FALSE);
+    return (TRUE);
 }
 
 int polytour::ui::MainMenuWindow::Impl::goToNextButton(EObjectType objType, void * obj, void * data, chtype key) {
-    if (!deactivateObj(objType, obj)) return (FALSE);
-
     auto *entry = (CDKBUTTON *)data;
     (void) activateCDKButton(entry, nullptr);
+    if (!deactivateObj(objType, obj)) return (FALSE);
     return (TRUE);
 }
 
 int polytour::ui::MainMenuWindow::Impl::goToNextScroll(EObjectType objType, void * obj, void * data, chtype key) {
-    if (!deactivateObj(objType, obj)) return (FALSE);
-
     auto *entry = (CDKSCROLL *)data;
     (void) activateCDKScroll(entry, nullptr);
+    if (!deactivateObj(objType, obj)) return (FALSE);
     return (TRUE);
 }
 
@@ -251,19 +254,20 @@ int polytour::ui::MainMenuWindow::Impl::activateUpdateUser(EObjectType objType, 
     auto* userData = (UserData*)data;
 
     auto coordinator = userData->coordinator;
-    auto err = coordinator.lock()->toUpdateUser();
-    if (!err)
-        return (FALSE);
+    userData->_impl->_callback = [coordinator](){
+        coordinator.lock()->toUpdateUser();
+    };
+    if (!deactivateObj(objType, obj)) return (FALSE);
     return (TRUE);
 }
 
 int polytour::ui::MainMenuWindow::Impl::activateCreateTournament(EObjectType objType, void * obj, void * data, chtype key) {
     auto* userData = (UserData*)data;
-
     auto coordinator = userData->coordinator;
-    auto err = coordinator.lock()->toTournamentCreation();
-    if (!err)
-        return (FALSE);
+    userData->_impl->_callback = [coordinator](){
+        coordinator.lock()->toTournamentCreation();
+    };
+    if (!deactivateObj(objType, obj)) return (FALSE);
     return (TRUE);
 }
 
@@ -274,9 +278,10 @@ int polytour::ui::MainMenuWindow::Impl::goToTournament(EObjectType objType, void
     auto selectedTournament = userData->_impl->_vActiveTournaments[selectedTournamentId];
 
     auto coordinator = userData->coordinator;
-    auto err = coordinator.lock()->toTournament(selectedTournament);
-    if (!err)
-        return (FALSE);
+    userData->_impl->_callback = [coordinator, selectedTournament](){
+        coordinator.lock()->toTournament(selectedTournament);
+    };
+    if (!deactivateObj(objType, obj)) return (FALSE);
     return (TRUE);
 }
 

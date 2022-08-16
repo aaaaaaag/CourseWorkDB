@@ -60,6 +60,10 @@ private:
     UserData _userdata;
     std::weak_ptr<ICoordinator> _pCoordinator;
     transport::Tournament _tournament;
+    std::function<void()> _callback;
+    std::function<void()> _finalCallback;
+
+    bool _isQuit = false;
 
     CDKSCREEN* _cdkScreen;
     CDKLABEL* _logo;
@@ -74,9 +78,13 @@ private:
     std::vector<transport::User> _vParticipants;
     std::vector<transport::Match> _vTourMatches;
 
-    static BINDFN_PROTO (goToNextItemList);
-    static BINDFN_PROTO (goToNextScroll);
-    static BINDFN_PROTO (goToNextButton);
+
+    static BINDFN_PROTO (toTourSelection);
+    static BINDFN_PROTO (toMatchSelection);
+    static BINDFN_PROTO (toJoinButton);
+    static BINDFN_PROTO (toMainMenuButton);
+    static BINDFN_PROTO (toMatchParticipants);
+
     static BINDFN_PROTO (increaseTour);
     static BINDFN_PROTO (decreaseTour);
     static BINDFN_PROTO (chooseMatch);
@@ -106,23 +114,32 @@ void polytour::ui::cdk::GuestTournamentWindow::Impl::init() {
     _tourMatchesList = createMatchesList();
     _takePartButton = createJoinButton();
     _toMainMenuButton = createToMainMenuButton();
-    bindCDKObject (vSCROLL, _participantsList, KEY_TAB, goToNextItemList, _tourList);
-    rebindMatches();
-    bindCDKObject (vBUTTON, _takePartButton, KEY_TAB, goToNextButton, _toMainMenuButton);
-    bindCDKObject (vBUTTON, _toMainMenuButton, KEY_TAB, goToNextScroll, _participantsList);
-
 
     _userdata._impl = this;
     _userdata._tourMatchesList = _tourMatchesList;
+
+    bindCDKObject (vSCROLL, _participantsList, KEY_TAB, toTourSelection, &_userdata);
+    bindCDKObject (vITEMLIST, _tourList, KEY_TAB, toMatchSelection, &_userdata);
+    bindCDKObject (vSCROLL, _tourMatchesList, KEY_TAB, toJoinButton, &_userdata);
+    bindCDKObject (vBUTTON, _takePartButton, KEY_TAB, toMainMenuButton, &_userdata);
+    bindCDKObject (vBUTTON, _toMainMenuButton, KEY_TAB, toMatchParticipants, &_userdata);
 
     bindCDKObject(vITEMLIST, _tourList, KEY_UP, increaseTour, &_userdata);
     bindCDKObject(vITEMLIST, _tourList, KEY_RIGHT, increaseTour, &_userdata);
     bindCDKObject(vITEMLIST, _tourList, KEY_DOWN, decreaseTour, &_userdata);
     bindCDKObject(vITEMLIST, _tourList, KEY_LEFT, decreaseTour, &_userdata);
     bindCDKObject(vBUTTON, _toMainMenuButton, KEY_ENTER, toMainMenu, &_userdata);
+    bindCDKObject (vSCROLL, _tourMatchesList, KEY_ENTER, chooseMatch, &_userdata);
 
     refreshCDKScreen(_cdkScreen);
     activateCDKScroll(_participantsList, nullptr);
+
+    do{
+        _callback();
+    } while(!_isQuit);
+
+    destroy();
+    _finalCallback();
 }
 
 void polytour::ui::cdk::GuestTournamentWindow::Impl::destroy() {
@@ -131,8 +148,8 @@ void polytour::ui::cdk::GuestTournamentWindow::Impl::destroy() {
     destroyCDKScroll(_participantsList);
     destroyCDKItemlist(_tourList);
     destroyCDKScroll(_tourMatchesList);
-    if (_tournament.cur_participants_num != _tournament.max_participants_num)
-        destroyCDKButton(_takePartButton);
+    destroyCDKButton(_takePartButton);
+    destroyCDKButton(_toMainMenuButton);
 
     destroyCDKScreen(_cdkScreen);
     endCDK();
@@ -243,6 +260,9 @@ CDKLABEL *polytour::ui::cdk::GuestTournamentWindow::Impl::createTournamentLabel(
 }
 
 int polytour::ui::cdk::GuestTournamentWindow::Impl::deactivateObj(EObjectType cdktype, void *object) {
+    if (!object)
+        return (FALSE);
+
     chtype esc = KEY_ESC;
     if (cdktype == vBUTTON)
         (void) activateCDKButton((CDKBUTTON*)object, &esc);
@@ -257,24 +277,6 @@ int polytour::ui::cdk::GuestTournamentWindow::Impl::deactivateObj(EObjectType cd
     return (TRUE);
 }
 
-int polytour::ui::cdk::GuestTournamentWindow::Impl::goToNextItemList(EObjectType objType, void * obj, void * data, chtype key) {
-    if (!deactivateObj(objType, obj)) return (FALSE);
-    (void) activateCDKItemlist((CDKITEMLIST *)data, nullptr);
-    return (TRUE);
-}
-
-int polytour::ui::cdk::GuestTournamentWindow::Impl::goToNextScroll(EObjectType objType, void * obj, void * data, chtype key) {
-    if (!deactivateObj(objType, obj)) return (FALSE);
-    (void) activateCDKScroll((CDKSCROLL *)data, nullptr);
-    return (TRUE);
-}
-
-int polytour::ui::cdk::GuestTournamentWindow::Impl::goToNextButton(EObjectType objType, void * obj, void * data, chtype key) {
-    if (!deactivateObj(objType, obj)) return (FALSE);
-    (void) activateCDKButton((CDKBUTTON*)data, nullptr);
-    return (TRUE);
-}
-
 int polytour::ui::cdk::GuestTournamentWindow::Impl::increaseTour(EObjectType objType, void * obj, void * data, chtype key) {
     auto userdata = (UserData*) data;
 
@@ -283,6 +285,7 @@ int polytour::ui::cdk::GuestTournamentWindow::Impl::increaseTour(EObjectType obj
     if (newItemId == tourList->listSize) newItemId = 0;
     setCDKItemlistCurrentItem(tourList, newItemId);
 
+    userdata->_impl->removeMatchView();
     destroyCDKScroll(userdata->_tourMatchesList);
     userdata->_impl->createMatchesList();
     userdata->_impl->rebindMatches();
@@ -307,6 +310,8 @@ int polytour::ui::cdk::GuestTournamentWindow::Impl::decreaseTour(EObjectType obj
     if (newItemId < 0) newItemId = tourList->listSize - 1;
     setCDKItemlistCurrentItem(tourList, newItemId);
 
+    userdata->_impl->removeMatchView();
+    unbindCDKObject(objType, tourList, KEY_TAB);
     destroyCDKScroll(userdata->_tourMatchesList);
     userdata->_impl->createMatchesList();
     userdata->_impl->rebindMatches();
@@ -320,8 +325,8 @@ int polytour::ui::cdk::GuestTournamentWindow::Impl::decreaseTour(EObjectType obj
 }
 
 void polytour::ui::cdk::GuestTournamentWindow::Impl::rebindMatches() {
-    bindCDKObject (vITEMLIST, _tourList, KEY_TAB, goToNextScroll, _tourMatchesList);
-    bindCDKObject (vSCROLL, _tourMatchesList, KEY_TAB, goToNextButton, _takePartButton);
+    bindCDKObject (vITEMLIST, _tourList, KEY_TAB, toMatchSelection, &_userdata);
+    bindCDKObject (vSCROLL, _tourMatchesList, KEY_TAB, toJoinButton, &_userdata);
     bindCDKObject (vSCROLL, _tourMatchesList, KEY_ENTER, chooseMatch, &_userdata);
 }
 
@@ -473,6 +478,7 @@ void polytour::ui::cdk::GuestTournamentWindow::Impl::createMatchView() {
 void polytour::ui::cdk::GuestTournamentWindow::Impl::removeMatchView() {
     if (_matchView._isDestroyed)
         return;
+    destroyCDKLabel(_matchView._matchViewLabel);
     destroyCDKLabel(_matchView._matchName);
     destroyCDKLabel(_matchView._matchStatus);
     destroyCDKLabel(_matchView._participant1Label);
@@ -497,9 +503,11 @@ int polytour::ui::cdk::GuestTournamentWindow::Impl::chooseMatch(EObjectType objT
 int polytour::ui::cdk::GuestTournamentWindow::Impl::toMainMenu(EObjectType objType, void * obj, void * data, chtype key) {
     auto* userData = (UserData*)data;
     auto coordinator = userData->_impl->_pCoordinator;
-    auto err = coordinator.lock()->toMainMenu();
-    if (!err)
-        return (TRUE);
+    userData->_impl->_finalCallback = [coordinator](){
+        coordinator.lock()->toMainMenu();
+    };
+    userData->_impl->_isQuit = true;
+    if (!deactivateObj(objType, obj)) return (FALSE);
     return (TRUE);
 }
 
@@ -507,6 +515,51 @@ char *polytour::ui::cdk::GuestTournamentWindow::Impl::convert(const std::string 
     char *pc = new char[s.size()+1];
     std::strcpy(pc, s.c_str());
     return pc;
+}
+
+int polytour::ui::cdk::GuestTournamentWindow::Impl::toTourSelection(EObjectType objType, void * obj, void * data, chtype key) {
+    auto userdata = (UserData*) data;
+    userdata->_impl->_callback = [obj = userdata->_impl->_tourList](){
+        activateCDKItemlist(obj, nullptr);
+    };
+    injectCDKScroll((CDKSCROLL*) obj, KEY_ESC);
+    return FALSE;
+}
+
+int polytour::ui::cdk::GuestTournamentWindow::Impl::toMatchSelection(EObjectType objType, void * obj, void * data, chtype key) {
+    auto userdata = (UserData*) data;
+    userdata->_impl->_callback = [obj = userdata->_impl->_tourMatchesList](){
+        activateCDKScroll(obj, nullptr);
+    };
+    injectCDKItemlist((CDKITEMLIST *) obj, KEY_ESC);
+    return FALSE;
+}
+
+int polytour::ui::cdk::GuestTournamentWindow::Impl::toJoinButton(EObjectType objType, void * obj, void * data, chtype key) {
+    auto userdata = (UserData*) data;
+    userdata->_impl->_callback = [obj = userdata->_impl->_takePartButton](){
+        activateCDKButton(obj, nullptr);
+    };
+    injectCDKScroll((CDKSCROLL*) obj, KEY_ESC);
+    return FALSE;
+}
+
+int polytour::ui::cdk::GuestTournamentWindow::Impl::toMainMenuButton(EObjectType objType, void * obj, void * data, chtype key) {
+    auto userdata = (UserData*) data;
+    userdata->_impl->_callback = [obj = userdata->_impl->_toMainMenuButton](){
+        activateCDKButton(obj, nullptr);
+    };
+    deactivateObj(objType, obj);
+    return TRUE;
+}
+
+int polytour::ui::cdk::GuestTournamentWindow::Impl::toMatchParticipants(EObjectType objType, void * obj, void * data, chtype key) {
+    auto userdata = (UserData*) data;
+    userdata->_impl->_callback = [obj = userdata->_impl->_participantsList](){
+        activateCDKScroll(obj, nullptr);
+    };
+    injectCDKButton((CDKBUTTON *) obj, KEY_ESC);
+    return TRUE;
 }
 
 template<typename... Args>
@@ -519,13 +572,10 @@ std::string polytour::ui::cdk::GuestTournamentWindow::Impl::string_format(const 
     return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
 }
 
-
 polytour::ui::cdk::GuestTournamentWindow::GuestTournamentWindow(
         const std::shared_ptr<ICoordinator> &coordinator,
         const transport::Tournament& tournament):
-_pImpl(std::make_unique<Impl>(coordinator, tournament)){
-
-}
+_pImpl(std::make_unique<Impl>(coordinator, tournament)){}
 
 polytour::ui::cdk::GuestTournamentWindow::~GuestTournamentWindow() = default;
 

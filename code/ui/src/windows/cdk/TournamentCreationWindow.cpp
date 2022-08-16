@@ -22,6 +22,7 @@ public:
         char* name;
         char* description;
         SItemList* participants;
+        Impl* _impl;
     } UserData;
 
 private:
@@ -39,6 +40,7 @@ private:
     SButton* _cancelButton;
     SButton* _createButton;
 
+    std::function<void()> _callback;
     UserData _userdata;
 
     static int deactivateObj(EObjectType cdktype GCC_UNUSED, void *object GCC_UNUSED);
@@ -123,6 +125,7 @@ void polytour::ui::cdk::TournamentCreationWindow::Impl::init() {
         .description = _tourDescription->info,
         .participants = _tourParticipants
     };
+    _userdata._impl = this;
 
     // Widgets binding section
     bindCDKObject (vENTRY, _tourName, KEY_TAB, activateMEntry, _tourDescription);
@@ -139,6 +142,9 @@ void polytour::ui::cdk::TournamentCreationWindow::Impl::init() {
 
     refreshCDKScreen(_cdkScreen);
     activateCDKEntry(_tourName, nullptr);
+
+    destroy();
+    _callback();
 }
 
 int polytour::ui::cdk::TournamentCreationWindow::Impl::deactivateObj(EObjectType cdktype, void *object) {
@@ -183,9 +189,9 @@ int polytour::ui::cdk::TournamentCreationWindow::Impl::activateItemList(EObjectT
 int polytour::ui::cdk::TournamentCreationWindow::Impl::cancel(EObjectType objType, void * obj, void * data, chtype key) {
     auto* userData = (UserData*)data;
     auto coordinator = userData->coordinator;
-    auto err = coordinator.lock()->toMainMenu();
-    if (!err)
-        return (FALSE);
+    userData->_impl->_callback = [coordinator](){
+        coordinator.lock()->toMainMenu();
+    };
     return (TRUE);
 }
 
@@ -205,7 +211,9 @@ int polytour::ui::cdk::TournamentCreationWindow::Impl::create(EObjectType objTyp
     tournament.status = polytour::transport::Tournament::status_wait_for_participants();
     coordinator.lock()->getMainAPI().tournamentAPI()->create(tournament);
     if (!coordinator.lock()->getMainAPI().tournamentAPI()->isError()) {
-        coordinator.lock()->toMainMenu();
+        userData->_impl->_callback = [coordinator](){
+            coordinator.lock()->toMainMenu();
+        };
         return (FALSE);
     }
 
