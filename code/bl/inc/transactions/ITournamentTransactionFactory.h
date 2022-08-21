@@ -24,6 +24,8 @@ namespace polytour::bl::transaction {
 
         virtual void leave(const transport::Tournament& tournament) = 0;
 
+        virtual void start(const transport::Tournament& tournament) = 0;
+
         virtual std::vector<transport::Tournament> search(const transport::Tournament::search_t& search) = 0;
 
         virtual std::vector<transport::User> getParticipants(const transport::Tournament& tournament) = 0;

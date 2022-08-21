@@ -30,7 +30,7 @@ add_library(${PROJECT_NAME}_lib_cdk STATIC
         src/windows/cdk/SignUpWindow.cpp
         inc/windows/cdk/SignUpWindow.h
         src/windows/cdk/UpdateUserWindow.cpp
-        inc/windows/cdk/UpdateUserWindow.h src/windows/cdk/TournamentCreationWindow.cpp inc/windows/cdk/TournamentCreationWindow.h src/windows/cdk/GuestTournamentWindow.cpp inc/windows/cdk/GuestTournamentWindow.h)
+        inc/windows/cdk/UpdateUserWindow.h src/windows/cdk/TournamentCreationWindow.cpp inc/windows/cdk/TournamentCreationWindow.h src/windows/cdk/GuestTournamentWindow.cpp inc/windows/cdk/GuestTournamentWindow.h src/windows/cdk/ParticipantTournamentWindow.cpp inc/windows/cdk/ParticipantTournamentWindow.h src/windows/cdk/LeaderWaitTournamentWindow.cpp inc/windows/cdk/LeaderWaitTournamentWindow.h src/windows/cdk/LeaderStartedTournamentWindow.cpp inc/windows/cdk/LeaderStartedTournamentWindow.h)
 
 target_include_directories(${PROJECT_NAME}_lib_cdk PUBLIC inc)
 target_link_libraries (${PROJECT_NAME}_lib_cdk PUBLIC cdk curses ${PROJECT_NAME}_lib transport bl)

@@ -19,8 +19,11 @@ namespace polytour::bl::facade {
 
         void erase(const transport::Match &match) override;
 
+        void update(const transport::Match &curMatch, const transport::Match &newMatch) override;
+
         std::vector<transport::Match> getMatches(const transport::Match::search_t &search) override;
 
+        void finish(const transport::Match &match, const transport::User &winner) override;
 
     private:
 

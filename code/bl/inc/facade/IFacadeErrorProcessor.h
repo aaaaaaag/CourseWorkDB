@@ -45,6 +45,9 @@ namespace polytour::bl::facade {
 
                 _errorObj = ErrorObj(err.what(), ErrorObj::ErrorType::Critical);
             }
+            catch (...) {
+
+            }
         }
 
         std::optional<ErrorObj> _errorObj;

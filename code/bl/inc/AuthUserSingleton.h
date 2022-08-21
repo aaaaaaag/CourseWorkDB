@@ -22,13 +22,14 @@ namespace polytour::bl {
 
     public:
 
-        static void authorize(const std::string& nick,
-                              const std::string& pass) {
-            //_pInstance = std::make_unique<transport::User>();
-            getInstance()->nickname = nick;
-            getInstance()->password = pass;
-            //_pInstance->nickname = nick;
-            //_pInstance->password = pass;
+        static void authorize(const transport::User& user) {
+            getInstance()->id = user.id;
+            getInstance()->name = user.name;
+            getInstance()->nickname = user.nickname;
+            getInstance()->password = user.password;
+            getInstance()->email = user.email;
+            getInstance()->age = user.age;
+            getInstance()->surname = user.surname;
         };
 
         static transport::User* getInstance() {

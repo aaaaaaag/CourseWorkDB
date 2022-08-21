@@ -46,6 +46,24 @@ polytour::bl::facade::TournamentFacade::getTournamentParticipants(const polytour
     return result;
 }
 
+void polytour::bl::facade::TournamentFacade::join(const polytour::transport::Tournament &tournament) {
+    processError([this, tournament](){
+        _pTransactionFactory->join(tournament);
+    });
+}
+
+void polytour::bl::facade::TournamentFacade::leave(const polytour::transport::Tournament &tournament) {
+    processError([this, tournament](){
+        _pTransactionFactory->leave(tournament);
+    });
+}
+
+void polytour::bl::facade::TournamentFacade::start(const polytour::transport::Tournament &tournament) {
+    processError([this, tournament](){
+        _pTransactionFactory->start(tournament);
+    });
+}
+
 polytour::bl::facade::TournamentFacade::TournamentFacade():
 _pTransactionFactory(std::make_unique<transaction::TournamentTransactionFactory>(
                         std::make_shared<db::repository::roles::GuestRole>())){}

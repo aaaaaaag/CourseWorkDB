@@ -150,7 +150,7 @@ int polytour::ui::cdk::UpdateUserWindow::Impl::save(EObjectType objType, void * 
     auto coordinator = userData->coordinator;
     coordinator.lock()->getMainAPI().userAPI()->updateUser(userDataToUser(*userData));
     if (!coordinator.lock()->getMainAPI().userAPI()->isError()) {
-        bl::AuthUserSingleton::authorize(userData->nickname, userData->password);
+        userData->_impl->_pCoordinator.lock()->getMainAPI().userAPI()->auth(userData->nickname, userData->password);
         const char *mesg[2];
         mesg[0] = "<C> Success ";
         mesg[1] = "<C>Press any key to continue.";

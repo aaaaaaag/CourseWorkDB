@@ -23,6 +23,11 @@ namespace polytour::bl::facade {
 
         virtual std::vector<transport::User> getTournamentParticipants(const transport::Tournament& tournament) = 0;
 
+        virtual void join(const transport::Tournament& tournament) = 0;
+
+        virtual void leave(const transport::Tournament& tournament) = 0;
+
+        virtual void start(const transport::Tournament &tournament) = 0;
     };
 }
 

@@ -13,7 +13,7 @@ namespace polytour::bl::transaction {
     class MatchTransactionFactory: public IMatchTransactionFactory{
     public:
 
-        MatchTransactionFactory(std::shared_ptr<db::repository::roles::IRole> role);
+        explicit MatchTransactionFactory(std::shared_ptr<db::repository::roles::IRole> role);
 
         void create(const transport::Match &match) override;
 
@@ -22,6 +22,8 @@ namespace polytour::bl::transaction {
         std::vector<transport::Match> getMatches(const transport::Match::search_t &search) override;
 
         void updateMatch(const transport::Match &curMatch, const transport::Match &newMatch) override;
+
+        void finish(const transport::Match &match, const transport::User& winner) override;
 
     private:
 

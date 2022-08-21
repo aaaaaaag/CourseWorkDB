@@ -28,6 +28,20 @@ polytour::bl::facade::MatchFacade::getMatches(const polytour::transport::Match::
     return result;
 }
 
+void polytour::bl::facade::MatchFacade::update(const polytour::transport::Match &curMatch,
+                                               const polytour::transport::Match &newMatch) {
+    processError([this, curMatch, newMatch]() {
+        _pTransactionFactory->updateMatch(curMatch, newMatch);
+    });
+}
+
+void polytour::bl::facade::MatchFacade::finish(const polytour::transport::Match &match,
+                                               const polytour::transport::User &winner) {
+    processError([this, match, winner]() {
+        _pTransactionFactory->finish(match, winner);
+    });
+}
+
 polytour::bl::facade::MatchFacade::MatchFacade():
 _pTransactionFactory(std::make_unique<transaction::MatchTransactionFactory>(
         std::make_shared<db::repository::roles::GuestRole>())){}

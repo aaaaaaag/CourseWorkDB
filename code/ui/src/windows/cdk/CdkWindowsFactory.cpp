@@ -11,6 +11,9 @@
 #include "windows/cdk/UpdateUserWindow.h"
 #include "windows/cdk/TournamentCreationWindow.h"
 #include "windows/cdk/GuestTournamentWindow.h"
+#include "windows/cdk/ParticipantTournamentWindow.h"
+#include "windows/cdk/LeaderWaitTournamentWindow.h"
+#include "windows/cdk/LeaderStartedTournamentWindow.h"
 
 std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createAuthorizationWindow() {
     return std::make_unique<cdk::AuthorizationWindow>(_pCoordinator.lock());
@@ -22,7 +25,28 @@ std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createMa
 
 std::unique_ptr<polytour::ui::IWindow>
 polytour::ui::CdkWindowsFactory::createTournamentWindow(const transport::Tournament& tournament) {
-    return std::make_unique<cdk::GuestTournamentWindow>(_pCoordinator.lock(), tournament);
+    auto currentUser = _pCoordinator.lock()->getMainAPI().userAPI()->currentUser();
+    auto tournamentParticipants = _pCoordinator.lock()->getMainAPI().tournamentAPI()->getTournamentParticipants(tournament);
+    bool isParticipant = false;
+    for (const auto& participant: tournamentParticipants) {
+        if (participant.id == currentUser.id)
+            isParticipant = true;
+    }
+
+    if (currentUser.id == tournament.organizer_id) {
+        if (tournament.status == transport::Tournament::status_wait_for_participants())
+            return std::make_unique<cdk::LeaderWaitTournamentWindow>(_pCoordinator.lock(), tournament);
+        else if (tournament.status == transport::Tournament::status_started() ||
+                tournament.status == transport::Tournament::status_finished())
+            return std::make_unique<cdk::LeaderStartedTournamentWindow>(_pCoordinator.lock(), tournament);
+        else
+            throw std::logic_error("ban");
+    }
+
+    if (isParticipant)
+        return std::make_unique<cdk::ParticipantTournamentWindow>(_pCoordinator.lock(), tournament);
+    else
+        return std::make_unique<cdk::GuestTournamentWindow>(_pCoordinator.lock(), tournament);
 }
 
 std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createUserInfoWindow() {

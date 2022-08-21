@@ -23,6 +23,8 @@ namespace polytour::bl::transaction {
 
         void leave(const transport::Tournament &tournament) override;
 
+        void start(const transport::Tournament &tournament) override;
+
         std::vector<transport::Tournament> search(const transport::Tournament::search_t &search) override;
 
         std::vector<transport::User> getParticipants(const transport::Tournament &tournament) override;
@@ -30,7 +32,7 @@ namespace polytour::bl::transaction {
     private:
 
         std::shared_ptr<db::repository::roles::IRole> _pRole;
-        transport::User _curUser;
+        transport::User* _curUser;
 
     };
 }

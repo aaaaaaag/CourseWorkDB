@@ -23,6 +23,8 @@ namespace polytour::bl::transaction {
 
         virtual void updateMatch(const transport::Match& curMatch, const transport::Match& newMatch) = 0;
 
+        virtual void finish(const transport::Match& match, const transport::User& winner) = 0;
+
     };
 }
 

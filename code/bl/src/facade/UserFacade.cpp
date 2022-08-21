@@ -14,7 +14,7 @@ void polytour::bl::facade::UserFacade::auth(const std::string &nick, const std::
         if (users.size() != 1)
             throw polytour::NotCriticalError("Failed authorization");
 
-        polytour::bl::AuthUserSingleton::authorize(nick, pass);
+        polytour::bl::AuthUserSingleton::authorize(users[0]);
     });
 }
 
@@ -54,9 +54,7 @@ _pTransactionFactory(std::make_unique<transaction::UserTransactionFactory>(
         std::make_shared<db::repository::roles::GuestRole>())){}
 
 void polytour::bl::facade::UserFacade::updateUser(const polytour::transport::User &user) {
-    auto curUser = currentUser();
-    if (isError())
-        return;
+    auto curUser = *AuthUserSingleton::getInstance();
     processError([this, user, curUser]() {
         if (user.nickname.empty())
             throw polytour::NotCriticalError("Nickname field doesn't passed");
@@ -69,7 +67,9 @@ void polytour::bl::facade::UserFacade::updateUser(const polytour::transport::Use
             throw polytour::NotCriticalError("Name field doesn't passed");
         if (user.email.empty())
             throw polytour::NotCriticalError("Email field doesn't passed");
-        _pTransactionFactory->updateUser(curUser, user);
+        auto newUser = user;
+        newUser.id = curUser.id;
+        _pTransactionFactory->updateUser(curUser, newUser);
     });
 }
 
