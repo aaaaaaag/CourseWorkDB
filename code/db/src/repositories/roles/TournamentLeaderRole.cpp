@@ -6,7 +6,7 @@
 
 polytour::transport::User polytour::db::repository::roles::TournamentLeaderRole::toUser() {
     transport::User user;
-    user.nickname = "myuser";
-    user.password = "mypass";
+    user.nickname = "leader";
+    user.password = "leader";
     return user;
 }

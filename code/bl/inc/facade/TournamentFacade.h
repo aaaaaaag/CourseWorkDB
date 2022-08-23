@@ -13,7 +13,7 @@ namespace polytour::bl::facade {
     class TournamentFacade: public ITournamentFacade{
     public:
 
-        TournamentFacade();
+        explicit TournamentFacade(std::shared_ptr<transaction::ITournamentTransactionFactory> transactionFactory);
 
         void create(const transport::Tournament &tournament) override;
 
@@ -31,7 +31,7 @@ namespace polytour::bl::facade {
 
     private:
 
-        std::unique_ptr<transaction::ITournamentTransactionFactory> _pTransactionFactory;
+        std::shared_ptr<transaction::ITournamentTransactionFactory> _pTransactionFactory;
 
     };
 }

@@ -192,6 +192,7 @@ int polytour::ui::cdk::TournamentCreationWindow::Impl::cancel(EObjectType objTyp
     userData->_impl->_callback = [coordinator](){
         coordinator.lock()->toMainMenu();
     };
+    if (!deactivateObj(objType, obj)) return (FALSE);
     return (TRUE);
 }
 

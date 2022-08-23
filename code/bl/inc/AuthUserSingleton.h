@@ -36,7 +36,6 @@ namespace polytour::bl {
             static std::unique_ptr<transport::User> _pInstance = std::make_unique<transport::User>();
 
             return _pInstance.get();
-            //return _pInstance.get();
         };
     };
 }

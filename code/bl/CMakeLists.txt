@@ -11,7 +11,6 @@ add_library(${PROJECT_NAME} STATIC
         src/transactions/TournamentTransactionFactory.cpp
         inc/transactions/TournamentTransactionFactory.h
         inc/transactions/IMatchTransactionFactory.h
-        src/AuthUserSingleton.cpp
         inc/AuthUserSingleton.h
         inc/facade/IMainFacade.h
         inc/facade/IUserFacade.h
@@ -24,7 +23,7 @@ add_library(${PROJECT_NAME} STATIC
         src/facade/TournamentFacade.cpp
         inc/facade/TournamentFacade.h
         src/facade/MatchFacade.cpp
-        inc/facade/MatchFacade.h src/facade/MainFacade.cpp inc/facade/MainFacade.h inc/facade/IFacadeErrorProcessor.h src/ErrorObj.cpp inc/ErrorObj.h)
+        inc/facade/MatchFacade.h src/facade/MainFacade.cpp inc/facade/MainFacade.h inc/facade/IFacadeErrorProcessor.h src/ErrorObj.cpp inc/ErrorObj.h inc/CurrentRoleSingleton.h)
 
 target_link_libraries(${PROJECT_NAME} transport db)
 target_include_directories(${PROJECT_NAME} PUBLIC inc)

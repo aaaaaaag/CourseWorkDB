@@ -6,7 +6,7 @@
 
 polytour::transport::User polytour::db::repository::roles::GuestRole::toUser() {
     transport::User user;
-    user.nickname = "myuser";
-    user.password = "mypass";
+    user.nickname = "guest";
+    user.password = "guest";
     return user;
 }

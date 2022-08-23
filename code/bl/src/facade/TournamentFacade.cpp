@@ -3,6 +3,8 @@
 //
 
 #include "facade/TournamentFacade.h"
+
+#include <utility>
 #include "transactions/TournamentTransactionFactory.h"
 #include "AuthUserSingleton.h"
 #include "repositories/roles/GuestRole.h"
@@ -64,6 +66,6 @@ void polytour::bl::facade::TournamentFacade::start(const polytour::transport::To
     });
 }
 
-polytour::bl::facade::TournamentFacade::TournamentFacade():
-_pTransactionFactory(std::make_unique<transaction::TournamentTransactionFactory>(
-                        std::make_shared<db::repository::roles::GuestRole>())){}
+polytour::bl::facade::TournamentFacade::TournamentFacade(
+        std::shared_ptr<transaction::ITournamentTransactionFactory> transactionFactory):
+_pTransactionFactory(std::move(transactionFactory)){}

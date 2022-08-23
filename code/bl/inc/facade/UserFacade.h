@@ -13,7 +13,7 @@ namespace polytour::bl::facade {
     class UserFacade: public IUserFacade {
     public:
 
-        UserFacade();
+        explicit UserFacade(std::shared_ptr<transaction::IUserTransactionFactory> transactionFactory);
 
         transport::User currentUser() override;
 
@@ -29,7 +29,7 @@ namespace polytour::bl::facade {
 
     private:
 
-        std::unique_ptr<transaction::IUserTransactionFactory> _pTransactionFactory;
+        std::shared_ptr<transaction::IUserTransactionFactory> _pTransactionFactory;
 
     };
 }

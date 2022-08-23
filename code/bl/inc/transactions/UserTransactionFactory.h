@@ -6,15 +6,14 @@
 #define COURSEWORKDB_USERTRANSACTIONFACTORY_H
 
 #include "IUserTransactionFactory.h"
-#include <memory>
-#include "repositories/roles/IRole.h"
+#include "repositories/IRepositoryFactoryCreator.h"
 #include <memory>
 
 namespace polytour::bl::transaction {
     class UserTransactionFactory: public IUserTransactionFactory {
     public:
 
-        explicit UserTransactionFactory(std::shared_ptr<db::repository::roles::IRole> role);
+        explicit UserTransactionFactory(std::shared_ptr<db::repository::IRepositoryFactoryCreator> factoryCreator);
 
         void addUser(const transport::User &user) override;
 
@@ -26,7 +25,7 @@ namespace polytour::bl::transaction {
 
     private:
 
-        std::shared_ptr<db::repository::roles::IRole> _pRole;
+        std::shared_ptr<db::repository::IRepositoryFactoryCreator> _factoryCreator;
         transport::User _curUser;
 
     };

@@ -38,6 +38,7 @@ public:
 
     std::shared_ptr<IDatabaseExecResult> executeSqlCommand(const std::string& command) {
         try {
+            auto username = _transaction.conn().username();
             return std::make_shared<PostgreSqlExecResult>(_transaction.exec(command));
         }
         catch (std::exception& ex) {

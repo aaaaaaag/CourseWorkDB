@@ -13,7 +13,7 @@ namespace polytour::bl::facade {
     class MatchFacade: public IMatchFacade{
     public:
 
-        MatchFacade();
+        explicit MatchFacade(std::shared_ptr<transaction::IMatchTransactionFactory> transactionFactory);
 
         void create(const transport::Match &match) override;
 
@@ -27,7 +27,7 @@ namespace polytour::bl::facade {
 
     private:
 
-        std::unique_ptr<transaction::IMatchTransactionFactory> _pTransactionFactory;
+        std::shared_ptr<transaction::IMatchTransactionFactory> _pTransactionFactory;
 
     };
 }

@@ -3,6 +3,8 @@
 //
 
 #include "facade/MatchFacade.h"
+
+#include <utility>
 #include "transactions/MatchTransactionFactory.h"
 #include "AuthUserSingleton.h"
 #include "repositories/roles/GuestRole.h"
@@ -42,6 +44,5 @@ void polytour::bl::facade::MatchFacade::finish(const polytour::transport::Match 
     });
 }
 
-polytour::bl::facade::MatchFacade::MatchFacade():
-_pTransactionFactory(std::make_unique<transaction::MatchTransactionFactory>(
-        std::make_shared<db::repository::roles::GuestRole>())){}
+polytour::bl::facade::MatchFacade::MatchFacade(std::shared_ptr<transaction::IMatchTransactionFactory> transactionFactory):
+_pTransactionFactory(std::move(transactionFactory)){}

@@ -12,7 +12,7 @@
 namespace polytour::ui {
     class CdkCoordinator: public ICoordinator{
     public:
-        explicit CdkCoordinator();
+        explicit CdkCoordinator(std::shared_ptr<bl::facade::IMainFacade> mainFacade);
 
         void setFactory(std::shared_ptr<IWindowsFactory> factory);
 
@@ -39,7 +39,7 @@ namespace polytour::ui {
         std::unique_ptr<IWindow> _pCurrentWindow;
 
         std::shared_ptr<IWindowsFactory> _pWindowsFactory;
-        std::unique_ptr<bl::facade::IMainFacade> _pMainFacade;
+        std::shared_ptr<bl::facade::IMainFacade> _pMainFacade;
 
     };
 }

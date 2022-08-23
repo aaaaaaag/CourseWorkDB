@@ -6,12 +6,15 @@
 #define COURSEWORKDB_MAINFACADE_H
 
 #include "IMainFacade.h"
+#include "repositories/roles/IRole.h"
 
 namespace polytour::bl::facade {
     class MainFacade: public IMainFacade{
     public:
 
-        MainFacade();
+        MainFacade(std::shared_ptr<IUserFacade> userFacade,
+                   std::shared_ptr<ITournamentFacade> tournamentFacade,
+                   std::shared_ptr<IMatchFacade> matchFacade);
 
         std::shared_ptr<IUserFacade> userAPI() override;
 
@@ -24,7 +27,6 @@ namespace polytour::bl::facade {
         std::shared_ptr<IUserFacade> _pUserFacade;
         std::shared_ptr<ITournamentFacade> _pTournamentFacade;
         std::shared_ptr<IMatchFacade> _pMatchFacade;
-
     };
 }
 

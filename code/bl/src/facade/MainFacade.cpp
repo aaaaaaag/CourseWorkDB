@@ -3,6 +3,8 @@
 //
 
 #include "facade/MainFacade.h"
+
+#include <utility>
 #include "facade/TournamentFacade.h"
 #include "facade/UserFacade.h"
 #include "facade/MatchFacade.h"
@@ -19,8 +21,11 @@ std::shared_ptr<polytour::bl::facade::IMatchFacade> polytour::bl::facade::MainFa
     return _pMatchFacade;
 }
 
-polytour::bl::facade::MainFacade::MainFacade():
-_pUserFacade(std::make_shared<UserFacade>()),
-_pTournamentFacade(std::make_shared<TournamentFacade>()),
-_pMatchFacade(std::make_shared<MatchFacade>()){
+polytour::bl::facade::MainFacade::MainFacade(std::shared_ptr<IUserFacade> userFacade,
+                                             std::shared_ptr<ITournamentFacade> tournamentFacade,
+                                             std::shared_ptr<IMatchFacade> matchFacade):
+                                             _pUserFacade(std::move(userFacade)),
+                                             _pTournamentFacade(std::move(tournamentFacade)),
+                                             _pMatchFacade(std::move(matchFacade)){
+
 }

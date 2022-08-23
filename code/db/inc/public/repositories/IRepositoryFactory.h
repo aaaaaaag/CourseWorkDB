@@ -17,13 +17,13 @@ namespace polytour::db::repository {
 
         virtual ~IRepositoryFactory() = default;
 
-        virtual UserRepository* getUserRepository() = 0;
+        virtual IRepository<transport::User>* getUserRepository() = 0;
 
-        virtual TournamentRepository* getTournamentRepository() = 0;
+        virtual IRepository<transport::Tournament>* getTournamentRepository() = 0;
 
-        virtual MatchRepository* getMatchRepository() = 0;
+        virtual IRepository<transport::Match>* getMatchRepository() = 0;
 
-        virtual TournamentParticipantsRepository* getTournamentParticipantsRepository() = 0;
+        virtual IRepository<transport::TournamentParticipant>* getTournamentParticipantsRepository() = 0;
 
     protected:
 

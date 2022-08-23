@@ -14,6 +14,7 @@
 #include "windows/cdk/ParticipantTournamentWindow.h"
 #include "windows/cdk/LeaderWaitTournamentWindow.h"
 #include "windows/cdk/LeaderStartedTournamentWindow.h"
+#include "CurrentRoleSingleton.h"
 
 std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createAuthorizationWindow() {
     return std::make_unique<cdk::AuthorizationWindow>(_pCoordinator.lock());
@@ -34,6 +35,7 @@ polytour::ui::CdkWindowsFactory::createTournamentWindow(const transport::Tournam
     }
 
     if (currentUser.id == tournament.organizer_id) {
+        bl::CurrentRoleSingleton::getInstance()->role = transport::Roles::Leader;
         if (tournament.status == transport::Tournament::status_wait_for_participants())
             return std::make_unique<cdk::LeaderWaitTournamentWindow>(_pCoordinator.lock(), tournament);
         else if (tournament.status == transport::Tournament::status_started() ||
@@ -43,10 +45,13 @@ polytour::ui::CdkWindowsFactory::createTournamentWindow(const transport::Tournam
             throw std::logic_error("ban");
     }
 
-    if (isParticipant)
+    if (isParticipant) {
+        bl::CurrentRoleSingleton::getInstance()->role = transport::Roles::Participant;
         return std::make_unique<cdk::ParticipantTournamentWindow>(_pCoordinator.lock(), tournament);
-    else
+    } else {
+        bl::CurrentRoleSingleton::getInstance()->role = transport::Roles::CommonUser;
         return std::make_unique<cdk::GuestTournamentWindow>(_pCoordinator.lock(), tournament);
+    }
 }
 
 std::unique_ptr<polytour::ui::IWindow> polytour::ui::CdkWindowsFactory::createUserInfoWindow() {

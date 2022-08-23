@@ -3,6 +3,8 @@
 //
 
 #include "facade/UserFacade.h"
+
+#include <utility>
 #include "AuthUserSingleton.h"
 #include "transactions/UserTransactionFactory.h"
 #include "repositories/roles/GuestRole.h"
@@ -49,10 +51,6 @@ void polytour::bl::facade::UserFacade::regNewUser(const polytour::transport::Use
     });
 }
 
-polytour::bl::facade::UserFacade::UserFacade():
-_pTransactionFactory(std::make_unique<transaction::UserTransactionFactory>(
-        std::make_shared<db::repository::roles::GuestRole>())){}
-
 void polytour::bl::facade::UserFacade::updateUser(const polytour::transport::User &user) {
     auto curUser = *AuthUserSingleton::getInstance();
     processError([this, user, curUser]() {
@@ -85,3 +83,6 @@ polytour::transport::User polytour::bl::facade::UserFacade::currentUser() {
     });
     return result;
 }
+
+polytour::bl::facade::UserFacade::UserFacade(std::shared_ptr<transaction::IUserTransactionFactory> transactionFactory):
+        _pTransactionFactory(std::move(transactionFactory)){}

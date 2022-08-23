@@ -6,32 +6,33 @@
 #include "repositories/RepositoryFactory.h"
 #include <utility>
 #include "AuthUserSingleton.h"
+#include "CurrentRoleSingleton.h"
 
 void polytour::bl::transaction::MatchTransactionFactory::create(const polytour::transport::Match &match) {
-    db::repository::RepositoryFactory repoFactory(_pRole);
-    repoFactory.getMatchRepository()->addObj(match);
+    auto repoFactory = _factoryCreator->create(CurrentRoleSingleton::getInstance()->role);
+    repoFactory->getMatchRepository()->addObj(match);
 }
 
 void polytour::bl::transaction::MatchTransactionFactory::erase(const polytour::transport::Match &match) {
-    db::repository::RepositoryFactory repoFactory(_pRole);
-    repoFactory.getMatchRepository()->deleteObj(match);
+    auto repoFactory = _factoryCreator->create(CurrentRoleSingleton::getInstance()->role);
+    repoFactory->getMatchRepository()->deleteObj(match);
 }
 
 std::vector<polytour::transport::Match>
 polytour::bl::transaction::MatchTransactionFactory::getMatches(const polytour::transport::Match::search_t &search) {
-    db::repository::RepositoryFactory repoFactory(_pRole);
-    return repoFactory.getMatchRepository()->findObj(search);
+    auto repoFactory = _factoryCreator->create(CurrentRoleSingleton::getInstance()->role);
+    return repoFactory->getMatchRepository()->findObj(search);
 }
 
 void polytour::bl::transaction::MatchTransactionFactory::updateMatch(const polytour::transport::Match &curMatch,
                                                                      const polytour::transport::Match &newMatch) {
-    db::repository::RepositoryFactory repoFactory(_pRole);
-    repoFactory.getMatchRepository()->updateObj(curMatch, newMatch);
+    auto repoFactory = _factoryCreator->create(CurrentRoleSingleton::getInstance()->role);
+    repoFactory->getMatchRepository()->updateObj(curMatch, newMatch);
 }
 
 void polytour::bl::transaction::MatchTransactionFactory::finish(const polytour::transport::Match &match, const transport::User& winner) {
-    db::repository::RepositoryFactory repoFactory(_pRole);
-    auto matchRepo = repoFactory.getMatchRepository();
+    auto repoFactory = _factoryCreator->create(CurrentRoleSingleton::getInstance()->role);
+    auto matchRepo = repoFactory->getMatchRepository();
     auto updatedMatch = match;
     updatedMatch.status = transport::Match::status_finished();
     if (updatedMatch.participant_1_id.getValue() == winner.id) {
@@ -65,7 +66,7 @@ void polytour::bl::transaction::MatchTransactionFactory::finish(const polytour::
             break;
         }
     } else {
-        auto tournamentRepo = repoFactory.getTournamentRepository();
+        auto tournamentRepo = repoFactory->getTournamentRepository();
         auto tournament = tournamentRepo->findObj({.id_ = match.tournament_id})[0];
         auto updatedTournament = tournament;
         updatedTournament.status = transport::Tournament::status_finished();
@@ -73,6 +74,7 @@ void polytour::bl::transaction::MatchTransactionFactory::finish(const polytour::
     }
 }
 
-polytour::bl::transaction::MatchTransactionFactory::MatchTransactionFactory(std::shared_ptr<db::repository::roles::IRole> role):
-_pRole(std::move(role)),
+polytour::bl::transaction::MatchTransactionFactory::MatchTransactionFactory(
+        std::shared_ptr<db::repository::IRepositoryFactoryCreator> factoryCreator):
+_factoryCreator(std::move(factoryCreator)),
 _curUser(*AuthUserSingleton::getInstance()){}

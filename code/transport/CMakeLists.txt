@@ -7,4 +7,4 @@ add_library(${PROJECT_NAME}
         trash.cpp
         IIdentifiable.h
         Match.h
-        NotMandatoryField.h Tournament.h User.h TournamentParticipant.h CriticalError.h NotCriticalError.h)
+        NotMandatoryField.h Tournament.h User.h TournamentParticipant.h CriticalError.h NotCriticalError.h Roles.h)
